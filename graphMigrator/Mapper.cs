@@ -25,5 +25,12 @@ namespace graphMigrator
                 await neo4j.CreateItem(item);
             }
         }
+        public async Task MigrateCreators(List<Creator> creators, Neo4jService neo4j)
+        {
+            foreach (var loan in creators)
+            {
+                await neo4j.CreateCreator(loan);
+            }
+        }
     }
 }

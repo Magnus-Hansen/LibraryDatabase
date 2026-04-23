@@ -13,6 +13,15 @@ namespace graphMigrator
             _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(user, password));
             _database = database;
         }
+        public async Task DeleteEverything()
+        {
+            var query = @"MATCH (n) DETACH DELETE n";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async wa =>
+            {
+                await wa.RunAsync(query);
+            });
+        }
 
         public async Task CreateUser(Loaner loaner)
         {
@@ -55,7 +64,7 @@ namespace graphMigrator
         {
             var query = @" 
             MERGE (i:item {id: $id})
-            SET i.name = $name, i.release_year = $release_year, i.description = $description, i.review_summary = $review_summary, i.media_type = $media_type, i.image = $image, i.language_id = $language_id , i.publisher_id = $publisher_id, i.average_stars = $average_stars";
+            SET i.name = $name, i.release_year = $release_year, i.description = $description, i.review_summary = $review_summary, i.media_type = $media_type, i.image = $image, i.average_stars = $average_stars";
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
             await session.ExecuteWriteAsync(async wa =>
             {
@@ -71,6 +80,24 @@ namespace graphMigrator
                     language_id = item.Language_id,
                     publisher_id = item.Publisher_id,
                     average_stars = item.Average_stars
+                });
+            });
+        }
+        public async Task CreateCreator(Creator creator)
+        {
+            var query = @" 
+            MERGE (c:creator {id: $id})
+            SET c.first_name = $first_name, c.last_name = $last_name, c.birthday = $birthday, c.description = $description";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async wa =>
+            {
+                await wa.RunAsync(query, new
+                {
+                    id = creator.Id,
+                    first_name = creator.First_name,
+                    last_name = creator.Last_name,
+                    birthday = creator.Birthday,
+                    description = creator.Description
                 });
             });
         }

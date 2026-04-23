@@ -59,7 +59,7 @@ namespace graphMigrator
             using var connection = new MySqlConnection(_connectionString);
             connection.Open();
 
-            using var cmd = new MySqlCommand("SELECT * FROM Item", connection);
+            using var cmd = new MySqlCommand("SELECT * FROM item", connection);
             using var reader = cmd.ExecuteReader();
             while (reader.Read()) {
                 items.Add(new Item
@@ -76,6 +76,26 @@ namespace graphMigrator
                 });
             }
             return items;
+        }
+        public List<Creator> GetCreators()
+        {
+            List<Creator> creators = new List<Creator>();
+            using var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+            using var cmd = new MySqlCommand("SELECT * FROM creator", connection);
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                creators.Add(new Creator
+                {
+                    Id = reader.GetInt32("id"),
+                    First_name = reader.GetString("first_name"),
+                    Last_name = reader.GetString("last_name"),
+                    Birthday = reader.IsDBNull("birthday") ? null : reader.GetDateTime("birthday"),
+                    Description = reader.IsDBNull("description") ? null : reader.GetString("description")
+                });
+            }
+            return creators;
         }
     }
 }
