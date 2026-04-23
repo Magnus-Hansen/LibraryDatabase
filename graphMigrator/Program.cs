@@ -4,8 +4,9 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        var mysql = new MySqlService("server=localhost;user=root;password=123456;database=mydb; port=3306");
-        var neo4j = new Neo4jService("bolt://localhost:7687", "neo4j", "bookworm");
+        Secret secret = new Secret();
+        var mysql = new MySqlService(secret.MySqlConnectionString);
+        var neo4j = new Neo4jService(secret.Neo4jUri, secret.Neo4jUser, secret.Neo4jPassword, secret.Neo4jDatabase);
 
         var loaners = mysql.GetLoaners();
         var mapper = new Mapper();

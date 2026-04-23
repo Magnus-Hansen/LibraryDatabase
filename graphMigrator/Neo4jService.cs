@@ -6,10 +6,12 @@ namespace graphMigrator
     public class Neo4jService
     {
         private readonly IDriver _driver;
+        private readonly string _database;
 
-        public Neo4jService(string uri, string user, string password)
+        public Neo4jService(string uri, string user, string password, string database)
         {
             _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(user, password));
+            _database = database;
         }
 
         public async Task CreateUser(Loaner loaner)
@@ -18,7 +20,7 @@ namespace graphMigrator
             MERGE (lo:loaner {id: $id})
             SET lo.first_name = $first_name, lo.last_name = $last_name, lo.cpr = $cpr, lo.tlf = $tlf, lo.email = $email, lo.password = $password";
 
-            await using var session = _driver.AsyncSession(o => o.WithDatabase("library"));
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
             await session.ExecuteWriteAsync(async wa =>
             {
                 await wa.RunAsync(query, new
@@ -39,7 +41,7 @@ namespace graphMigrator
             MERGE (la:language {id: $id})
             SET la.name = $name";
 
-            await using var session = _driver.AsyncSession(o => o.WithDatabase("library"));
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
             await session.ExecuteWriteAsync(async wa =>
             {
                 await wa.RunAsync(query, new
