@@ -51,5 +51,28 @@ namespace graphMigrator
                 });
             });
         }
+        public async Task CreateItem(Item item)
+        {
+            var query = @" 
+            MERGE (i:item {id: $id})
+            SET i.name = $name, i.release_year = $release_year, i.description = $description, i.review_summary = $review_summary, i.media_type = $media_type, i.image = $image, i.language_id = $language_id , i.publisher_id = $publisher_id, i.average_stars = $average_stars";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async wa =>
+            {
+                await wa.RunAsync(query, new
+                {
+                    id = item.Id,
+                    name = item.Name,
+                    release_year = item.Release_year,
+                    description = item.Description,
+                    review_summary = item.Review_summary,
+                    media_type = item.Media_type,
+                    image = item.Image,
+                    language_id = item.Language_id,
+                    publisher_id = item.Publisher_id,
+                    average_stars = item.Average_stars
+                });
+            });
+        }
     }
 }

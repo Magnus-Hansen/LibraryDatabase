@@ -18,5 +18,12 @@ namespace graphMigrator
                 await neo4j.CreateLanguage(language);
             }
         }
+        public async Task MigrateItems(List<Item> items, Neo4jService neo4j)
+        {
+            foreach (var item in items)
+            {
+                await neo4j.CreateItem(item);
+            }
+        }
     }
 }
