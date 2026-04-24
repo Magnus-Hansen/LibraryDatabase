@@ -17,9 +17,9 @@ namespace graphMigrator
         {
             var query = @"MATCH (n) DETACH DELETE n";
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
-            await session.ExecuteWriteAsync(async wa =>
+            await session.ExecuteWriteAsync(async tx =>
             {
-                await wa.RunAsync(query);
+                await tx.RunAsync(query);
             });
         }
 
@@ -187,6 +187,18 @@ namespace graphMigrator
             await session.ExecuteWriteAsync(async tx =>
             {
                 await tx.RunAsync(query, new { fines });
+            });
+        }
+        public async Task CreateBoardGame(List<BoardGame> boardGames)
+        {
+            var query = @"
+            UNWIND $boardGames AS b
+            MERGE (bg:board_game {id: b.Id})
+            SET bg.no_of_players = b.No_of_players, bg.play_time = b.Play_time, bg.age_group = b.Age_group";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { boardGames });
             });
         }
     }

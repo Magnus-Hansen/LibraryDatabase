@@ -145,10 +145,10 @@ namespace graphMigrator
             using var readers = cmd.ExecuteReader();
             while (readers.Read())
             {
-                genres.Add(new Genre 
-                { 
-                    Id = readers.GetInt32("id"), 
-                    Name = readers.GetString("name") 
+                genres.Add(new Genre
+                {
+                    Id = readers.GetInt32("id"),
+                    Name = readers.GetString("name")
                 });
             }
             return genres;
@@ -162,9 +162,10 @@ namespace graphMigrator
             using var readers = cmd.ExecuteReader();
             while (readers.Read())
             {
-                tags.Add(new Tag { 
-                    Id = readers.GetInt32("id"), 
-                    Name = readers.GetString("name") 
+                tags.Add(new Tag
+                {
+                    Id = readers.GetInt32("id"),
+                    Name = readers.GetString("name")
                 });
             }
             return tags;
@@ -271,6 +272,25 @@ namespace graphMigrator
                 });
             }
             return fines;
+        }
+        public List<BoardGame> GetBoardGames()
+        {
+            List<BoardGame> boardGames = new List<BoardGame>();
+            using var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+            using var cmd = new MySqlCommand("SELECT * FROM board_game", connection);
+            using var readers = cmd.ExecuteReader();
+            while (readers.Read())
+            {
+                boardGames.Add(new BoardGame
+                {
+                    Id = readers.GetInt32("id"),
+                    No_of_players = readers.IsDBNull("no_of_players") ? null : readers.GetString("no_of_players"),
+                    Play_time = readers.IsDBNull("play_time") ? null : readers.GetString("play_time"),
+                    Age_group = readers.IsDBNull("age_group") ? null : readers.GetString("age_group")
+                });
+            }
+            return boardGames;
         }
     }
 }
