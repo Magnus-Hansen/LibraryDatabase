@@ -15,6 +15,14 @@ internal class Program
         await neo4j.CreateCreator(mysql.GetCreators());
         await neo4j.CreateBook(mysql.GetBooks());
         await neo4j.CreatePublisher(mysql.GetPublishers());
+        await neo4j.CreateGenre(mysql.GetGenres());
+        await neo4j.CreateTag(mysql.GetTags());
+        await neo4j.CreateInventory(mysql.GetInventories());
+        await neo4j.CreateLoan(mysql.GetLoans());
+        await neo4j.CreateReservation(mysql.GetReservations());
+        await neo4j.CreateReview(mysql.GetReviews());
+        await neo4j.CreateFine(mysql.GetFines());
+
 
         Console.WriteLine("Completed migration");
     }

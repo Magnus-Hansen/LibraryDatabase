@@ -31,9 +31,9 @@ namespace graphMigrator
             SET lo.first_name = l.First_name, lo.last_name = l.Last_name, lo.cpr = l.CPR, lo.tlf = l.Tlf, lo.email = l.Email, lo.password = l.Password";
 
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
-            await session.ExecuteWriteAsync(async wa =>
+            await session.ExecuteWriteAsync(async tx =>
             {
-                await wa.RunAsync(query, new { loaners });
+                await tx.RunAsync(query, new { loaners });
             });
         }
         public async Task CreateLanguage(List<Language> languages)
@@ -64,9 +64,9 @@ namespace graphMigrator
             SET it.name = i.Name, it.release_year = i.Release_year, it.description = i.Description, it.review_summary = i.Review_summary, 
             it.media_type = i.Media_type, it.image = i.Image, it.average_stars = i.Average_stars";
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
-            await session.ExecuteWriteAsync(async wa =>
+            await session.ExecuteWriteAsync(async tx =>
             {
-                await wa.RunAsync(query, new { items });
+                await tx.RunAsync(query, new { items });
             });
         }
         public async Task CreateCreator(List<Creator> creators)
@@ -76,9 +76,9 @@ namespace graphMigrator
             MERGE (cr:creator {id: c.Id})
             SET cr.first_name = c.First_name, cr.last_name = c.Last_name, cr.birthday = cr.Birthday, cr.description = c.Description";
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
-            await session.ExecuteWriteAsync(async wa =>
+            await session.ExecuteWriteAsync(async tx =>
             {
-                await wa.RunAsync(query, new { creators });
+                await tx.RunAsync(query, new { creators });
             });
         }
         public async Task CreatePublisher(List<Publisher> publishers)
@@ -88,9 +88,9 @@ namespace graphMigrator
             MERGE (pu:publisher {id: p.Id})
             SET pu.name = p.Name";
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
-            await session.ExecuteWriteAsync(async wa =>
+            await session.ExecuteWriteAsync(async tx =>
             {
-                await wa.RunAsync(query, new { publishers });
+                await tx.RunAsync(query, new { publishers });
             });
         }
         public async Task CreateBook(List<Book> books)
@@ -98,11 +98,95 @@ namespace graphMigrator
             var query = @" 
             UNWIND $books AS b
             MERGE (bo:book {id: b.Id})
-            SET bo.ISBN = b.ISBN, bo.no_of_pages = b.No_of_pages, bo.version = b.Version, bo.item_id = b.Item_id";
+            SET bo.ISBN = b.ISBN, bo.no_of_pages = b.No_of_pages, bo.version = b.Version";
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
-            await session.ExecuteWriteAsync(async wa =>
+            await session.ExecuteWriteAsync(async tx =>
             {
-                await wa.RunAsync(query, new { books});
+                await tx.RunAsync(query, new { books });
+            });
+        }
+        public async Task CreateGenre(List<Genre> genres)
+        {
+            var query = @"
+            UNWIND $genres AS g
+            MERGE (ge:genre {id: g.Id})
+            SET ge.name = g.Name";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { genres });
+            });
+        }
+        public async Task CreateTag(List<Tag> tags)
+        {
+            var query = @"
+            UNWIND $tags AS t
+            MERGE (ta:tag {id: t.Id})
+            SET ta.name = t.Name";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { tags });
+            });
+        }
+        public async Task CreateInventory(List<Inventory> inventories)
+        {
+            var query = @"
+            UNWIND $inventories AS i
+            MERGE (in:inventory {id: i.Id})
+            SET in.status = i.Status, in.barcode = i.Barcode, in.placement = i.Placement";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { inventories });
+            });
+        }
+        public async Task CreateLoan(List<Loan> loans)
+        {
+            var query = @"
+            UNWIND $loans AS l
+            MERGE (lo:loan {id: l.Id})
+            SET lo.loan_date = l.Loan_date, lo.due_date = l.Due_date, lo.return_date = l.Return_date, lo.status = l.Status";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { loans });
+            });
+        }
+        public async Task CreateReservation(List<Reservation> reservations)
+        {
+            var query = @"
+            UNWIND $reservations AS r
+            MERGE (re:reservation {id: r.Id})
+            SET re.status = r.Status, re.queue_number = r. Queue_number";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { reservations });
+            });
+        }
+        public async Task CreateReview(List<Review> reviews)
+        {
+            var query = @"
+            UNWIND $reviews AS r
+            MERGE (re:review)
+            SET re.no_of_stars = r.No_of_stars, re.text = r.Text";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { reviews });
+            });
+        }
+        public async Task CreateFine(List<Fine> fines)
+        {
+            var query = @"
+            UNWIND $fines AS f
+            MERGE (fi:fine {id: f.Id})
+            SET fi.amount = f.Amount, fi.status = f.Status, fi.created_date = f.Created_date, fi.paid_date = f.Paid_date, fi.due_date = f.Due_date";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { fines });
             });
         }
     }
