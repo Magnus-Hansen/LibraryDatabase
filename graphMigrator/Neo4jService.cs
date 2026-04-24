@@ -23,82 +23,86 @@ namespace graphMigrator
             });
         }
 
-        public async Task CreateUser(Loaner loaner)
+        public async Task CreateLoaner(List<Loaner> loaners)
         {
             var query = @" 
-            MERGE (lo:loaner {id: $id})
-            SET lo.first_name = $first_name, lo.last_name = $last_name, lo.cpr = $cpr, lo.tlf = $tlf, lo.email = $email, lo.password = $password";
+            UNWIND $loaners AS l
+            MERGE (lo:loaner {id: l.Id})
+            SET lo.first_name = l.First_name, lo.last_name = l.Last_name, lo.cpr = l.CPR, lo.tlf = l.Tlf, lo.email = l.Email, lo.password = l.Password";
 
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
             await session.ExecuteWriteAsync(async wa =>
             {
-                await wa.RunAsync(query, new
-                {
-                    id = loaner.Id,
-                    first_name = loaner.FirstName,
-                    last_name = loaner.LastName,
-                    cpr = loaner.CPR,
-                    tlf = loaner.Tlf,
-                    email = loaner.Email,
-                    password = loaner.Password
-                });
+                await wa.RunAsync(query, new { loaners });
             });
         }
-        public async Task CreateLanguage(Language language)
+        public async Task CreateLanguage(List<Language> languages)
         {
-            var query = @" 
-            MERGE (la:language {id: $id})
-            SET la.name = $name";
+            var query = @"
+            UNWIND $languages AS l
+            MERGE (la:language {id: l.Id})
+            SET la.name = l.Name";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
 
-            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
-            await session.ExecuteWriteAsync(async wa =>
+            try
             {
-                await wa.RunAsync(query, new
+                await session.ExecuteWriteAsync(async tx =>
                 {
-                    id = language.Id,
-                    name = language.Name
+                    await tx.RunAsync(query, new { languages });
                 });
-            });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating languages: {ex.Message}");
+            }
         }
-        public async Task CreateItem(Item item)
+        public async Task CreateItem(List<Item> items)
         {
             var query = @" 
-            MERGE (i:item {id: $id})
-            SET i.name = $name, i.release_year = $release_year, i.description = $description, i.review_summary = $review_summary, i.media_type = $media_type, i.image = $image, i.average_stars = $average_stars";
+            UNWIND $items AS i
+            MERGE (it:item {id: i.Id})
+            SET it.name = i.Name, it.release_year = i.Release_year, it.description = i.Description, it.review_summary = i.Review_summary, 
+            it.media_type = i.Media_type, it.image = i.Image, it.average_stars = i.Average_stars";
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
             await session.ExecuteWriteAsync(async wa =>
             {
-                await wa.RunAsync(query, new
-                {
-                    id = item.Id,
-                    name = item.Name,
-                    release_year = item.Release_year,
-                    description = item.Description,
-                    review_summary = item.Review_summary,
-                    media_type = item.Media_type,
-                    image = item.Image,
-                    language_id = item.Language_id,
-                    publisher_id = item.Publisher_id,
-                    average_stars = item.Average_stars
-                });
+                await wa.RunAsync(query, new { items });
             });
         }
-        public async Task CreateCreator(Creator creator)
+        public async Task CreateCreator(List<Creator> creators)
         {
             var query = @" 
-            MERGE (c:creator {id: $id})
-            SET c.first_name = $first_name, c.last_name = $last_name, c.birthday = $birthday, c.description = $description";
+            UNWIND $creators AS c
+            MERGE (cr:creator {id: c.Id})
+            SET cr.first_name = c.First_name, cr.last_name = c.Last_name, cr.birthday = cr.Birthday, cr.description = c.Description";
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
             await session.ExecuteWriteAsync(async wa =>
             {
-                await wa.RunAsync(query, new
-                {
-                    id = creator.Id,
-                    first_name = creator.First_name,
-                    last_name = creator.Last_name,
-                    birthday = creator.Birthday,
-                    description = creator.Description
-                });
+                await wa.RunAsync(query, new { creators });
+            });
+        }
+        public async Task CreatePublisher(List<Publisher> publishers)
+        {
+            var query = @"
+            UNWIND $publishers AS p
+            MERGE (pu:publisher {id: p.Id})
+            SET pu.name = p.Name";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async wa =>
+            {
+                await wa.RunAsync(query, new { publishers });
+            });
+        }
+        public async Task CreateBook(List<Book> books)
+        {
+            var query = @" 
+            UNWIND $books AS b
+            MERGE (bo:book {id: b.Id})
+            SET bo.ISBN = b.ISBN, bo.no_of_pages = b.No_of_pages, bo.version = b.Version, bo.item_id = b.Item_id";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async wa =>
+            {
+                await wa.RunAsync(query, new { books});
             });
         }
     }

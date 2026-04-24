@@ -26,8 +26,8 @@ namespace graphMigrator
                 loaners.Add(new Loaner
                 {
                     Id = reader.GetInt32("id"),
-                    FirstName = reader.GetString("first_name"),
-                    LastName = reader.GetString("last_name"),
+                    First_name = reader.GetString("first_name"),
+                    Last_name = reader.GetString("last_name"),
                     CPR = reader.GetString("cpr"),
                     Tlf = reader.IsDBNull("tlf") ? null : reader.GetString("tlf"),
                     Email = reader.GetString("email"),
@@ -54,14 +54,16 @@ namespace graphMigrator
             }
             return languages;
         }
-        public List<Item> GetItems() {
+        public List<Item> GetItems()
+        {
             List<Item> items = new List<Item>();
             using var connection = new MySqlConnection(_connectionString);
             connection.Open();
 
             using var cmd = new MySqlCommand("SELECT * FROM item", connection);
             using var reader = cmd.ExecuteReader();
-            while (reader.Read()) {
+            while (reader.Read())
+            {
                 items.Add(new Item
                 {
                     Language_id = reader.GetInt32("id"),
@@ -96,6 +98,43 @@ namespace graphMigrator
                 });
             }
             return creators;
+        }
+        public List<Publisher> GetPublishers()
+        {
+            List<Publisher> publishers = new List<Publisher>();
+            using var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+            using var cmd = new MySqlCommand("SELECT * FROM publisher", connection);
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                publishers.Add(new Publisher
+                {
+                    Id = reader.GetInt32("id"),
+                    Name = reader.GetString("name")
+                });
+            }
+            return publishers;
+        }
+        public List<Book> GetBooks()
+        {
+            List<Book> books = new List<Book>();
+            using var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+            using var cmd = new MySqlCommand("SELECT * FROM book", connection);
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                books.Add(new Book
+                {
+                    Id = reader.GetInt32("id"),
+                    ISBN = reader.GetString("isbn"),
+                    No_of_pages = reader.GetInt32("no_of_pages"),
+                    Version = reader.IsDBNull("version") ? null : reader.GetString("version"),
+                    Item_id = reader.GetInt32("item_id")
+                });
+            }
+            return books;
         }
     }
 }
