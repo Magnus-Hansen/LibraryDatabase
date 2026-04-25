@@ -226,8 +226,7 @@ namespace graphMigrator
                     Reviews = reviewMongos.Where(r => r.object_id == item.Id).ToList(),
                     AverageStars = item.Average_stars ?? 0.0
                 };
-
-
+                itemMongos.Add(itemMongo);
             }
 
             return itemMongos;
