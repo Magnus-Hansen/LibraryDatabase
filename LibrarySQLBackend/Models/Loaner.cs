@@ -36,7 +36,7 @@ public partial class Loaner
     public string? Email { get; set; }
 
     [Column("password")]
-    [StringLength(45)]
+    [StringLength(255)]
     public string? Password { get; set; }
 
     [InverseProperty("Loaner")]
