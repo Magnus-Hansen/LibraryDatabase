@@ -20,12 +20,22 @@ internal class Program
         await neo4j.CreateInventory(mysql.GetInventories());
         await neo4j.CreateLoan(mysql.GetLoans());
         await neo4j.CreateReservation(mysql.GetReservations());
-        await neo4j.CreateReview(mysql.GetReviews());
         await neo4j.CreateFine(mysql.GetFines());
         await neo4j.CreateBoardGame(mysql.GetBoardGames());
         await neo4j.Item_Language(mysql.GetItems());
         await neo4j.Item_Publisher(mysql.GetItems());
         await neo4j.Item_Creator(mysql.GetItemCreators());
+        await neo4j.Book_item(mysql.GetBooks());
+        await neo4j.Item_Genre(mysql.GetItemGenres());
+        await neo4j.Item_Tag(mysql.GetItemTags());
+        await neo4j.Boardgame_item(mysql.GetBoardGames());
+        await neo4j.CreateReview(mysql.GetReviews());
+        await neo4j.Item_Inventory(mysql.GetInventories());
+        await neo4j.Item_Reservation(mysql.GetReservations());
+        await neo4j.Loaner_Loan(mysql.GetLoans());
+        await neo4j.Loaner_Reservation(mysql.GetReservations());
+        await neo4j.Loan_Fine(mysql.GetFines());
+        await neo4j.Loan_Inventory(mysql.GetLoans());
 
 
         Console.WriteLine("Completed migration");

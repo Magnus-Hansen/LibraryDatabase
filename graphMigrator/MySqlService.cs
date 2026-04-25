@@ -69,7 +69,7 @@ namespace graphMigrator
                     Id = reader.GetInt32("id"),
                     Language_id = reader.GetInt32("language_id"),
                     Name = reader.GetString("name"),
-                    Release_year = reader.GetInt16("release_year"),
+                    Release_year = reader.GetInt32("release_year"),
                     Description = reader.GetString("description"),
                     Review_summary = reader.GetString("review_summary"),
                     Media_type = reader.GetString("media_type"),
@@ -246,7 +246,7 @@ namespace graphMigrator
                 {
                     Loaner_id = readers.GetInt32("loaner_id"),
                     Item_id = readers.GetInt32("item_id"),
-                    No_of_stars = readers.GetInt32("no_of_stars"),
+                    No_of_stars = readers.GetFloat("no_of_stars"),
                     Text = readers.IsDBNull("text") ? null : readers.GetString("text")
                 });
             }
