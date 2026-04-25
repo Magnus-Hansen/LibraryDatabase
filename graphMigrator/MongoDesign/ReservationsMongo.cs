@@ -6,8 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace graphMigrator.MongoDesign
-{
     public class ReservationsMongo
     {
         [BsonId]
@@ -20,4 +18,4 @@ namespace graphMigrator.MongoDesign
         public string Status { get; set; } // "pending" | "ready for pickup" | "fulfilled" Maybe make enum?
 
     }
-}
+

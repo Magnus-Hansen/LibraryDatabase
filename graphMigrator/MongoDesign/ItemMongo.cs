@@ -21,8 +21,8 @@ public class ItemMongo
     public List<GenreMongo> Genres { get; set; }
     public List<TagMongo> Tags { get; set; }
 
-    public BookDetailsMongo BookDetails { get; set; } // nullable
-    public BoardgameDetailsMongo BoardgameDetails { get; set; } // nullable
+    public BookDetailsMongo? BookDetails { get; set; } // nullable
+    public BoardgameDetailsMongo? BoardgameDetails { get; set; } // nullable
 
     public List<ReviewMongo> Reviews { get; set; }
 

@@ -7,8 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace graphMigrator.MongoDesign
-{
     public class LoanersMongo
     {
         [BsonId]
@@ -26,4 +24,4 @@ namespace graphMigrator.MongoDesign
         public List<ActiveLoansPreviewMongo> ActiveLoans { get; set; }
 
     }
-}
+

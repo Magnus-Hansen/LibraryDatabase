@@ -8,8 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace graphMigrator.MongoDesign
-{
+
     public class LoansMongo
     {
         [BsonId]
@@ -27,4 +26,4 @@ namespace graphMigrator.MongoDesign
         public List<Fine> Fines { get; set; }
 
     }
-}
+

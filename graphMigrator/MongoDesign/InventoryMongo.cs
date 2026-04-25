@@ -6,20 +6,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace graphMigrator.MongoDesign
-{
+
     public class InventoryMongo
     {
         [BsonId]
         public ObjectId Id { get; set; }
 
-        [BsonId]
-        public ObjectId item_id { get; set; }
+        public int Item_Id { get; set; }
 
-        public string item_name { get; set; }
-        public string barcode { get; set; }
-        public string status { get; set; } // "available" | "loaned out" | "lost" Make enum?
-        public string placement { get; set; }
+        public string Item_Name { get; set; }
+        public string Barcode { get; set; }
+        public string Status { get; set; } // "available" | "loaned out" | "lost" Make enum?
+        public string Placement { get; set; } 
 
     }
-}
+
