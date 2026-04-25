@@ -393,53 +393,36 @@ namespace graphMigrator
             }
             return reservationsMongos;
         }
+
+        // Clear existing data in MongoDB collection
+        public async Task ClearCollection(string collectionName)
+        {
+            try
+            {
+                var database = _client.GetDatabase(_databaseName);
+                var collection = database.GetCollection<dynamic>(collectionName);
+                collection.DeleteMany(Builders<dynamic>.Filter.Empty);
+                Console.WriteLine($"Collection '{collectionName}' cleared successfully!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to clear collection '{collectionName}': {ex.Message}");
+            }
+        }
+
         // Insert Data into MongoDB
-        public string InsertData<T>(string collectionName, List<T> data)
+        public async Task InsertData<T>(string collectionName, List<T> data)
         {
             try
             {
                 var collection = _database.GetCollection<T>(collectionName);
                 collection.InsertMany(data);
-                return $"Data inserted into MongoDB collection '{collectionName}' successfully!";
+                Console.WriteLine($"Data inserted into MongoDB collection '{collectionName}' successfully!");
             }
             catch (Exception ex)
             {
-                return $"Failed to insert data into MongoDB: {ex.Message}";
+                Console.WriteLine($"Failed to insert data into MongoDB: {ex.Message}");
             }
         }
-        // Clear existing data in MongoDB collection
-        public string ClearCollection(string collectionName, string _connectionString)
-        {
-            try
-            {
-                var client = new MongoClient(_connectionString);
-                var database = client.GetDatabase(_databaseName);
-                var collection = database.GetCollection<dynamic>(collectionName);
-                collection.DeleteMany(Builders<dynamic>.Filter.Empty);
-                return $"Collection '{collectionName}' cleared successfully!";
-            }
-            catch (Exception ex)
-            {
-                return $"Failed to clear collection '{collectionName}': {ex.Message}";
-            }
-        }
-        // Load data into MongoDB
-        public string LoadData<T>(string collectionName, List<T> data, string _connectionString)
-        {
-            try
-            {
-                var client = new MongoClient(_connectionString);
-                var database = client.GetDatabase(_databaseName);
-                var collection = database.GetCollection<T>(collectionName);
-                collection.InsertMany(data);
-                return $"Data loaded into MongoDB collection '{collectionName}' successfully!";
-            }
-            catch (Exception ex)
-            {
-                return $"Failed to load data into MongoDB: {ex.Message}";
-            }
-        }
-
-
     }
 }

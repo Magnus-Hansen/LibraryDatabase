@@ -48,7 +48,17 @@ internal class Program
 
         // MongoDB Migration
         var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
-        await mongoDB.ClearCollection();
+        await mongoDB.ClearCollection("Items");
+        await mongoDB.InsertData("Items", mongoDB.TransformItems());
+        await mongoDB.ClearCollection("Inventories");
+        await mongoDB.InsertData("Inventories", mongoDB.TransformInventory());
+        await mongoDB.ClearCollection("Loaners");
+        await mongoDB.InsertData("Loaners", mongoDB.TransformLoaners());
+        await mongoDB.ClearCollection("Loans");
+        await mongoDB.InsertData("Loans", mongoDB.TransformLoans());
+        await mongoDB.ClearCollection("Reservations");
+        await mongoDB.InsertData("Reservations", mongoDB.TransformReservations());
+
 
     }
 }
