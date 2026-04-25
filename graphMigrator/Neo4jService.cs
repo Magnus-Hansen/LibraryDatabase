@@ -189,16 +189,52 @@ namespace graphMigrator
                 await tx.RunAsync(query, new { fines });
             });
         }
-        public async Task CreateBoardGame(List<BoardGame> boardGames)
+        public async Task CreateBoardGame(List<BoardGame> boardgames)
         {
             var query = @"
-            UNWIND $boardGames AS b
-            MERGE (bg:board_game {id: b.Id})
+            UNWIND $boardgames AS b
+            MERGE (bg:boardgame {id: b.Id})
             SET bg.no_of_players = b.No_of_players, bg.play_time = b.Play_time, bg.age_group = b.Age_group";
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
             await session.ExecuteWriteAsync(async tx =>
             {
-                await tx.RunAsync(query, new { boardGames });
+                await tx.RunAsync(query, new { boardgames });
+            });
+        }
+        public async Task Item_Language(List<Item> items)
+        {
+            var query = @"
+            UNWIND $items AS i
+            MATCH (it:item {id: i.Id}), (la:language {id: i.Language_id})
+            MERGE (it)-[:HAS_LANGUAGE]->(la)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { items });
+            });
+        }
+        public async Task Item_Publisher(List<Item> items)
+        {
+            var query = @"
+            UNWIND $items AS i
+            MATCH (it:item {id: i.Id}), (pu:publisher {id: i.Publisher_id})
+            MERGE (it)-[:PUBLISHED_BY]->(pu)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { items });
+            });
+        }
+        public async Task Item_Creator(List<ItemCreator> itemCreators)
+        {
+            var query = @"
+            UNWIND $itemCreators AS ic
+            MATCH (it:item {id: ic.Item_id}), (cr:creator {id: ic.Creator_id})
+            MERGE (it)-[:CREATED_BY]->(cr)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { itemCreators });
             });
         }
     }

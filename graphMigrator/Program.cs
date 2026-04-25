@@ -23,6 +23,9 @@ internal class Program
         await neo4j.CreateReview(mysql.GetReviews());
         await neo4j.CreateFine(mysql.GetFines());
         await neo4j.CreateBoardGame(mysql.GetBoardGames());
+        await neo4j.Item_Language(mysql.GetItems());
+        await neo4j.Item_Publisher(mysql.GetItems());
+        await neo4j.Item_Creator(mysql.GetItemCreators());
 
 
         Console.WriteLine("Completed migration");
