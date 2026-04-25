@@ -1,4 +1,5 @@
 ﻿using graphMigrator;
+using Microsoft.AspNetCore.DataProtection;
 
 internal class Program
 {
