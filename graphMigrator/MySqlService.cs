@@ -66,9 +66,10 @@ namespace graphMigrator
             {
                 items.Add(new Item
                 {
-                    Language_id = reader.GetInt32("id"),
+                    Id = reader.GetInt32("id"),
+                    Language_id = reader.GetInt32("language_id"),
                     Name = reader.GetString("name"),
-                    Release_year = reader.GetInt16("release_year"),
+                    Release_year = reader.GetInt32("release_year"),
                     Description = reader.GetString("description"),
                     Review_summary = reader.GetString("review_summary"),
                     Media_type = reader.GetString("media_type"),
@@ -245,7 +246,7 @@ namespace graphMigrator
                 {
                     Loaner_id = readers.GetInt32("loaner_id"),
                     Item_id = readers.GetInt32("item_id"),
-                    No_of_stars = readers.GetInt32("no_of_stars"),
+                    No_of_stars = readers.GetFloat("no_of_stars"),
                     Text = readers.IsDBNull("text") ? null : readers.GetString("text")
                 });
             }
@@ -278,7 +279,7 @@ namespace graphMigrator
             List<BoardGame> boardGames = new List<BoardGame>();
             using var connection = new MySqlConnection(_connectionString);
             connection.Open();
-            using var cmd = new MySqlCommand("SELECT * FROM board_game", connection);
+            using var cmd = new MySqlCommand("SELECT * FROM boardgame", connection);
             using var readers = cmd.ExecuteReader();
             while (readers.Read())
             {
@@ -291,6 +292,57 @@ namespace graphMigrator
                 });
             }
             return boardGames;
+        }
+        public List<ItemCreator> GetItemCreators()
+        {
+            List<ItemCreator> itemCreators = new List<ItemCreator>();
+            using var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+            using var cmd = new MySqlCommand("SELECT * FROM item_creator", connection);
+            using var readers = cmd.ExecuteReader();
+            while (readers.Read())
+            {
+                itemCreators.Add(new ItemCreator
+                {
+                    Item_id = readers.GetInt32("item_id"),
+                    Creator_id = readers.GetInt32("creator_id")
+                });
+            }
+            return itemCreators;
+        }
+        public List<ItemGenre> GetItemGenres()
+        {
+            List<ItemGenre> itemGenres = new List<ItemGenre>();
+            using var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+            using var cmd = new MySqlCommand("SELECT * FROM item_genre", connection);
+            using var readers = cmd.ExecuteReader();
+            while (readers.Read())
+            {
+                itemGenres.Add(new ItemGenre
+                {
+                    Item_id = readers.GetInt32("item_id"),
+                    Genre_id = readers.GetInt32("genre_id")
+                });
+            }
+            return itemGenres;
+        }
+        public List<ItemTag> GetItemTags()
+        {
+            List<ItemTag> itemTags = new List<ItemTag>();
+            using var connection = new MySqlConnection(_connectionString);
+            connection.Open();
+            using var cmd = new MySqlCommand("SELECT * FROM item_tag", connection);
+            using var readers = cmd.ExecuteReader();
+            while (readers.Read())
+            {
+                itemTags.Add(new ItemTag
+                {
+                    Item_id = readers.GetInt32("item_id"),
+                    Tag_id = readers.GetInt32("tag_id")
+                });
+            }
+            return itemTags;
         }
     }
 }

@@ -165,18 +165,6 @@ namespace graphMigrator
                 await tx.RunAsync(query, new { reservations });
             });
         }
-        public async Task CreateReview(List<Review> reviews)
-        {
-            var query = @"
-            UNWIND $reviews AS r
-            MERGE (re:review)
-            SET re.no_of_stars = r.No_of_stars, re.text = r.Text";
-            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
-            await session.ExecuteWriteAsync(async tx =>
-            {
-                await tx.RunAsync(query, new { reviews });
-            });
-        }
         public async Task CreateFine(List<Fine> fines)
         {
             var query = @"
@@ -189,16 +177,191 @@ namespace graphMigrator
                 await tx.RunAsync(query, new { fines });
             });
         }
-        public async Task CreateBoardGame(List<BoardGame> boardGames)
+        public async Task CreateBoardGame(List<BoardGame> boardgames)
         {
             var query = @"
-            UNWIND $boardGames AS b
-            MERGE (bg:board_game {id: b.Id})
+            UNWIND $boardgames AS b
+            MERGE (bg:boardgame {id: b.Id})
             SET bg.no_of_players = b.No_of_players, bg.play_time = b.Play_time, bg.age_group = b.Age_group";
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
             await session.ExecuteWriteAsync(async tx =>
             {
-                await tx.RunAsync(query, new { boardGames });
+                await tx.RunAsync(query, new { boardgames });
+            });
+        }
+        public async Task Item_Language(List<Item> items)
+        {
+            var query = @"
+            UNWIND $items AS i
+            MATCH (it:item {id: i.Id}), (la:language {id: i.Language_id})
+            MERGE (it)-[:HAS_LANGUAGE]->(la)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { items });
+            });
+        }
+        public async Task Item_Publisher(List<Item> items)
+        {
+            var query = @"
+            UNWIND $items AS i
+            MATCH (it:item {id: i.Id}), (pu:publisher {id: i.Publisher_id})
+            MERGE (it)-[:PUBLISHED_BY]->(pu)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { items });
+            });
+        }
+        public async Task Item_Creator(List<ItemCreator> itemCreators)
+        {
+            var query = @"
+            UNWIND $itemCreators AS ic
+            MATCH (it:item {id: ic.Item_id}), (cr:creator {id: ic.Creator_id})
+            MERGE (it)-[:CREATED_BY]->(cr)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { itemCreators });
+            });
+        }
+        public async Task Book_item(List<Book> books)
+        {
+            var query = @"
+            UNWIND $books AS b
+            MATCH (bo:book {id: b.Id}), (it:item {id: b.Id})
+            MERGE (bo)-[:IS_BOOK]->(it)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { books });
+            });
+        }
+        public async Task Boardgame_item(List<BoardGame> boardgames)
+        {
+            var query = @"
+            UNWIND $boardgames AS b
+            MATCH (bg:boardgame {id: b.Id}), (it:item {id: b.Id})
+            MERGE (bg)-[:IS_BOARDGAME]->(it)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { boardgames });
+            });
+        }
+        public async Task Item_Genre(List<ItemGenre> itemGenres)
+        {
+            var query = @"
+            UNWIND $itemGenres AS ig
+            MATCH (it:item {id: ig.Item_id}), (ge:genre {id: ig.Genre_id})
+            MERGE (it)-[:GENRE_IS]->(ge)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { itemGenres });
+            });
+        }
+        public async Task Item_Tag(List<ItemTag> itemTags)
+        {
+            var query = @"
+            UNWIND $itemTags AS it
+            MATCH (i:item {id: it.Item_id}), (t:tag {id: it.Tag_id})
+            MERGE (i)-[:TAGGED_AS]->(t)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { itemTags });
+            });
+        }
+        public async Task CreateReview(List<Review> reviews)
+        {
+            var query = @"
+            UNWIND $reviews AS r
+            CREATE (re:review)
+            SET re.no_of_stars = r.No_of_stars, re.text = r.Text
+            WITH re, r
+            MATCH (it:item {id: r.Item_id})
+            MERGE (re)-[:REVIEW_FOR]->(it)
+            WITH re, r
+            MATCH (lo:loaner {id: r.Loaner_id})
+            MERGE (re)-[:REVIEW_BY]->(lo)";
+
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { reviews });
+            });
+        }
+        public async Task Item_Reservation(List<Reservation> reservations)
+        {
+            var query = @"
+            UNWIND $reservations AS r
+            MATCH (re:reservation {id: r.Id}), (it:item {id: r.Item_id})
+            MERGE (re)-[:RESERVE_ITEM]->(it)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { reservations });
+            });
+        }
+        public async Task Item_Inventory(List<Inventory> inventories)
+        {
+            var query = @"
+            UNWIND $inventories AS i
+            MATCH (in:inventory {id: i.Id}), (it:item {id: i.Item_id})
+            MERGE (in)-[:STORES_ITEM]->(it)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { inventories });
+            });
+        }
+        public async Task Loaner_Reservation(List<Reservation> reservations)
+        {
+            var query = @"
+            UNWIND $reservations AS r
+            MATCH (re:reservation {id: r.Id}), (lo:loaner {id: r.Loaner_id})
+            MERGE (lo)-[:MADE_RESERVATION]->(re)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { reservations });
+            });
+        }
+        public async Task Loaner_Loan(List<Loan> loans)
+        {
+            var query = @"
+            UNWIND $loans AS l
+            MATCH (lo:loan {id: l.Id}), (loaner:loaner {id: l.Loaner_id})
+            MERGE (loaner)-[:MADE_LOAN]->(lo)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { loans });
+            });
+        }
+        public async Task Loan_Fine(List<Fine> fines)
+        {
+            var query = @"
+            UNWIND $fines AS f
+            MATCH (fi:fine {id: f.Id}), (lo:loan {id: f.Loan_id})
+            MERGE (lo)-[:HAS_FINE]->(fi)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { fines });
+            });
+        }
+        public async Task Loan_Inventory(List<Loan> loans)
+        {
+            var query = @"
+            UNWIND $loans AS l
+            MATCH (lo:loan {id: l.Id}), (in:inventory {id: l.Inventory_id})
+            MERGE (lo)-[:LOANS_FROM]->(in)";
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(query, new { loans });
             });
         }
     }
