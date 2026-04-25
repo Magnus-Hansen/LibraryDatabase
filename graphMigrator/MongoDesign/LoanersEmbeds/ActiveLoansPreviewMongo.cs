@@ -6,8 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace graphMigrator.MongoDesign.LoanersEmbeds
-{
     public class ActiveLoansPreviewMongo
     {
         [BsonId]
@@ -15,7 +13,5 @@ namespace graphMigrator.MongoDesign.LoanersEmbeds
         
         public string Item_Name { get; set; }
         public DateTime Due_Date { get; set; }
-
-
     }
-}
+

@@ -165,7 +165,7 @@ namespace graphMigrator
                 await tx.RunAsync(query, new { reservations });
             });
         }
-        public async Task CreateFine(List<Fine> fines)
+        public async Task CreateFine(List<FineMongo> fines)
         {
             var query = @"
             UNWIND $fines AS f
@@ -340,7 +340,7 @@ namespace graphMigrator
                 await tx.RunAsync(query, new { loans });
             });
         }
-        public async Task Loan_Fine(List<Fine> fines)
+        public async Task Loan_Fine(List<FineMongo> fines)
         {
             var query = @"
             UNWIND $fines AS f

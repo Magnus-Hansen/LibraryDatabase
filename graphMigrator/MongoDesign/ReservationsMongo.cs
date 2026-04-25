@@ -10,8 +10,8 @@ using System.Threading.Tasks;
     {
         [BsonId]
         public ObjectId Id { get; set; }
-        public ObjectId Loaner_Id { get; set; }
-        public ObjectId Item_Id { get; set; }
+        public int Loaner_Id { get; set; }
+        public int Item_Id { get; set; }
 
         public string Item_Name { get; set; }
         public DateTime Created_At { get; set; }

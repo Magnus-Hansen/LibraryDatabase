@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using Secret = graphMigrator.Secret;
 
 
 internal class Program
@@ -9,8 +10,8 @@ internal class Program
 
     private static async Task Main(string[] args)
     {
-        //Secret secret = new Secret();
-        //var mysql = new MySqlService(secret.MySqlConnectionString);
+        Secret secret = new Secret();
+        var mysql = new MySqlService(secret.MySqlConnectionString);
         //var neo4j = new Neo4jService(secret.Neo4jUri, secret.Neo4jUser, secret.Neo4jPassword, secret.Neo4jDatabase);
 
         //await neo4j.DeleteEverything();
@@ -46,6 +47,8 @@ internal class Program
         //Console.WriteLine("Completed migration");
 
         // MongoDB Migration
-        
+        var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
+        await mongoDB.ClearCollection();
+
     }
 }

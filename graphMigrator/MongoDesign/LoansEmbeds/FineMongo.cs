@@ -1,9 +1,8 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace graphMigrator.MongoDesign.LoansEmbeds
-{
-    public class Fine
+
+    public class FineMongo
     {
 
         [BsonId]
@@ -16,4 +15,3 @@ namespace graphMigrator.MongoDesign.LoansEmbeds
         public DateTime DueDate { get; set; }
         public DateTime PaidDate { get; set; }
     }
-}
