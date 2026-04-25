@@ -288,7 +288,8 @@ namespace graphMigrator
                     Id = readers.GetInt32("id"),
                     No_of_players = readers.IsDBNull("no_of_players") ? null : readers.GetString("no_of_players"),
                     Play_time = readers.IsDBNull("play_time") ? null : readers.GetString("play_time"),
-                    Age_group = readers.IsDBNull("age_group") ? null : readers.GetString("age_group")
+                    Age_group = readers.IsDBNull("age_group") ? null : readers.GetString("age_group"),
+                    Item_id = readers.GetInt32("item_id")
                 });
             }
             return boardGames;

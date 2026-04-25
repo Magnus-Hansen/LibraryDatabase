@@ -9,9 +9,15 @@ internal class Program
         var mysql = new MySqlService(secret.MySqlConnectionString);
         var neo4j = new Neo4jService(secret.Neo4jUri, secret.Neo4jUser, secret.Neo4jPassword, secret.Neo4jDatabase);
 
-        await neo4j.ExecuteInTransaction(async transaction =>
+        var query = @" 
+            UNWIND $objects AS l
+            MERGE (lo:loaner {id: l.Id})
+            SET lo.first_name = l.First_name, lo.last_name = l.Last_name, lo.cpr = l.CPR, lo.tlf = l.Tlf, lo.email = l.Email, lo.password = l.Password";
+
+        /*await neo4j.ExecuteInTransaction(async transaction =>
         {
             await neo4j.DeleteEverything(transaction);
+            await neo4j.CreateNode(transaction, mysql.GetLoaners(), query);
             await neo4j.CreateLoaner(transaction, mysql.GetLoaners());
             await neo4j.CreateLanguage(transaction, mysql.GetLanguages());
             await neo4j.CreateItem(transaction, mysql.GetItems());
@@ -42,6 +48,6 @@ internal class Program
 
 
             Console.WriteLine("Completed migration");
-        });
+        });*/
     }
 }

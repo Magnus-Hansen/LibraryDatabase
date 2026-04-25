@@ -13,6 +13,7 @@ namespace graphMigrator
             _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(user, password));
             _database = database;
         }
+
         public async Task ExecuteInTransaction(Func<IAsyncTransaction, Task> action)
         {
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
@@ -37,6 +38,10 @@ namespace graphMigrator
             await transaction.RunAsync(query);
         }
 
+        public async Task CreateNode<T>(IAsyncTransaction transaction, List<T> objects, string query)
+        {
+            await transaction.RunAsync(query, new { objects });
+        }
         public async Task CreateLoaner(IAsyncTransaction transaction, List<Loaner> loaners)
         {
             var query = @" 
@@ -196,7 +201,7 @@ namespace graphMigrator
         {
             var query = @"
             UNWIND $boardgames AS b
-            MATCH (bg:boardgame {id: b.Id}), (it:item {id: b.Id})
+            MATCH (bg:boardgame {id: b.Id}), (it:item {id: b.Item_id})
             MERGE (bg)-[:IS_BOARDGAME]->(it)";
 
             await transaction.RunAsync(query, new { boardgames });
