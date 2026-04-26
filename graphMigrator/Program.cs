@@ -8,46 +8,40 @@ internal class Program
         Secret secret = new Secret();
         var mysql = new MySqlService(secret.MySqlConnectionString);
         var neo4j = new Neo4jService(secret.Neo4jUri, secret.Neo4jUser, secret.Neo4jPassword, secret.Neo4jDatabase);
+        var neo4jQueries = neo4j.nodeQueries;
 
-        var query = @" 
-            UNWIND $objects AS l
-            MERGE (lo:loaner {id: l.Id})
-            SET lo.first_name = l.First_name, lo.last_name = l.Last_name, lo.cpr = l.CPR, lo.tlf = l.Tlf, lo.email = l.Email, lo.password = l.Password";
-
-        /*await neo4j.ExecuteInTransaction(async transaction =>
+        await neo4j.ExecuteInTransaction(async transaction =>
         {
             await neo4j.DeleteEverything(transaction);
-            await neo4j.CreateNode(transaction, mysql.GetLoaners(), query);
-            await neo4j.CreateLoaner(transaction, mysql.GetLoaners());
-            await neo4j.CreateLanguage(transaction, mysql.GetLanguages());
-            await neo4j.CreateItem(transaction, mysql.GetItems());
-            await neo4j.CreateCreator(transaction, mysql.GetCreators());
-            await neo4j.CreateBook(transaction, mysql.GetBooks());
-            await neo4j.CreatePublisher(transaction, mysql.GetPublishers());
-            await neo4j.CreateGenre(transaction, mysql.GetGenres());
-            await neo4j.CreateTag(transaction, mysql.GetTags());
-            await neo4j.CreateInventory(transaction, mysql.GetInventories());
-            await neo4j.CreateLoan(transaction, mysql.GetLoans());
-            await neo4j.CreateReservation(transaction, mysql.GetReservations());
-            await neo4j.CreateFine(transaction, mysql.GetFines());
-            await neo4j.CreateBoardGame(transaction, mysql.GetBoardGames());
-            await neo4j.Item_Language(transaction, mysql.GetItems());
-            await neo4j.Item_Publisher(transaction, mysql.GetItems());
-            await neo4j.Item_Creator(transaction, mysql.GetItemCreators());
-            await neo4j.Book_item(transaction, mysql.GetBooks());
-            await neo4j.Item_Genre(transaction, mysql.GetItemGenres());
-            await neo4j.Item_Tag(transaction, mysql.GetItemTags());
-            await neo4j.Boardgame_item(transaction, mysql.GetBoardGames());
-            await neo4j.CreateReview(transaction, mysql.GetReviews());
-            await neo4j.Item_Inventory(transaction, mysql.GetInventories());
-            await neo4j.Item_Reservation(transaction, mysql.GetReservations());
-            await neo4j.Loaner_Loan(transaction, mysql.GetLoans());
-            await neo4j.Loaner_Reservation(transaction, mysql.GetReservations());
-            await neo4j.Loan_Fine(transaction, mysql.GetFines());
-            await neo4j.Loan_Inventory(transaction, mysql.GetLoans());
-
+            await neo4j.Neo4jTransaction(transaction, mysql.GetLoaners(), neo4jQueries["Loaner"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetLanguages(), neo4jQueries["Language"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetItems(), neo4jQueries["Item"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetCreators(), neo4jQueries["Creator"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetBooks(), neo4jQueries["Book"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetPublishers(), neo4jQueries["Publisher"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetGenres(), neo4jQueries["Genre"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetTags(), neo4jQueries["Tag"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetInventories(), neo4jQueries["Inventory"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetLoans(), neo4jQueries["Loan"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetReservations(), neo4jQueries["Reservation"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetFines(), neo4jQueries["Fine"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetBoardGames(), neo4jQueries["Boardgame"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetItems(), neo4jQueries["Item_Language"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetItems(), neo4jQueries["Item_Publisher"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetItemCreators(), neo4jQueries["Item_Creator"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetBooks(), neo4jQueries["Book_Item"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetBoardGames(), neo4jQueries["Boardgame_Item"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetItemGenres(), neo4jQueries["Item_Genre"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetItemTags(), neo4jQueries["Item_Tag"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetReviews(), neo4jQueries["Review"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetReservations(), neo4jQueries["Item_Reservation"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetInventories(), neo4jQueries["Item_Inventory"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetReservations(), neo4jQueries["Loaner_Reservation"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetLoans(), neo4jQueries["Loaner_Loan"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetFines(), neo4jQueries["Fine_Loan"]);
+            await neo4j.Neo4jTransaction(transaction, mysql.GetLoans(), neo4jQueries["Loan_Inventory"]);
 
             Console.WriteLine("Completed migration");
-        });*/
+        });
     }
 }
