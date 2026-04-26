@@ -38,7 +38,7 @@ namespace graphMigrator
             await transaction.RunAsync(query);
         }
 
-        public async Task Neo4jTransaction<T>(IAsyncTransaction transaction, List<T> objects, string query)
+        public async Task Neo4jExecute<T>(IAsyncTransaction transaction, List<T> objects, string query)
         {
             await transaction.RunAsync(query, new { objects });
         }
