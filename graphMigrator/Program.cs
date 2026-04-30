@@ -17,8 +17,8 @@ internal class Program
         var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
         await mongoDB.ClearCollection("Items");
         await mongoDB.InsertData("Items", mongoDB.TransformItems());
-        await mongoDB.ClearCollection("Inventories");
-        await mongoDB.InsertData("Inventories", mongoDB.TransformInventory());
+        await mongoDB.ClearCollection("Inventory");
+        await mongoDB.InsertData("Inventory", mongoDB.TransformInventory());
         await mongoDB.ClearCollection("Loaners");
         await mongoDB.InsertData("Loaners", mongoDB.TransformLoaners());
         await mongoDB.ClearCollection("Loans");
@@ -26,6 +26,6 @@ internal class Program
         await mongoDB.ClearCollection("Reservations");
         await mongoDB.InsertData("Reservations", mongoDB.TransformReservations());
 
-
+        await mongoDB.ClearCollection("Inventories");
     }
 }

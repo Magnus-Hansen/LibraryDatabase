@@ -158,13 +158,15 @@ namespace graphMigrator
             {
                 BoardgameDetailsMongo boardgameDetailsMongo = new BoardgameDetailsMongo
                 {
-                    No_Of_Players = int.TryParse(boardgameDetail.No_of_players, out int noOfPlayers) ? noOfPlayers : 0,
-                    Play_Time = int.TryParse(boardgameDetail.Play_time, out int playTime) ? playTime : 0,
-                    Age_Group = int.TryParse(boardgameDetail.Age_group, out int ageGroup) ? ageGroup : 0,
+                    No_Of_Players = boardgameDetail.No_of_players,
+                    Play_Time = boardgameDetail.Play_time,
+                    Age_Group = boardgameDetail.Age_group,
                     item_id = boardgameDetail.Item_id
                 };
                 boardgameDetailsMongos.Add(boardgameDetailsMongo);
+              
             }
+
             // Turns MySQL Review into MongoDB ReviewMongo and also adds the Loaner name to the ReviewMongo
             List<Review> reviews = mysqlService.GetReviews();
             List<Loaner> loaners = mysqlService.GetLoaners();
