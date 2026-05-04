@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibrarySQLBackend", "Librar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryAPI", "LibraryAPI\LibraryAPI.csproj", "{98DA9142-7DBB-4C0C-8676-E2E2E97D37C6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryMongoDBBackend", "LibraryMongoDBBackend\LibraryMongoDBBackend.csproj", "{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{98DA9142-7DBB-4C0C-8676-E2E2E97D37C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98DA9142-7DBB-4C0C-8676-E2E2E97D37C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98DA9142-7DBB-4C0C-8676-E2E2E97D37C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
