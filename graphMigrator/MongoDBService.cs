@@ -423,5 +423,73 @@ namespace graphMigrator
                 Console.WriteLine($"Failed to insert data into MongoDB: {ex.Message}");
             }
         }
+
+        // Create the indexes that support the most common MongoDB query patterns.
+        public async Task CreateIndexes()
+        {
+            try
+            {
+                var items = _database.GetCollection<ItemMongo>("Items");
+                await items.Indexes.CreateManyAsync(new[]
+                {
+                    new CreateIndexModel<ItemMongo>(Builders<ItemMongo>.IndexKeys.Ascending(x => x.Name)),
+                    new CreateIndexModel<ItemMongo>(Builders<ItemMongo>.IndexKeys.Ascending(x => x.MediaType))
+                });
+
+                var loaners = _database.GetCollection<LoanersMongo>("Loaners");
+                await loaners.Indexes.CreateManyAsync(new[]
+                {
+                    new CreateIndexModel<LoanersMongo>(
+                        Builders<LoanersMongo>.IndexKeys.Ascending(x => x.Email),
+                        new CreateIndexOptions { Unique = true }),
+                    new CreateIndexModel<LoanersMongo>(
+                        Builders<LoanersMongo>.IndexKeys.Ascending(x => x.Cpr),
+                        new CreateIndexOptions { Unique = true })
+                });
+
+                var inventories = _database.GetCollection<InventoryMongo>("Inventories");
+                await inventories.Indexes.CreateManyAsync(new[]
+                {
+                    new CreateIndexModel<InventoryMongo>(
+                        Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Barcode),
+                        new CreateIndexOptions { Unique = true }),
+                    new CreateIndexModel<InventoryMongo>(Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Item_Id)),
+                    new CreateIndexModel<InventoryMongo>(Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Status)),
+                    new CreateIndexModel<InventoryMongo>(
+                        Builders<InventoryMongo>.IndexKeys.Combine(
+                            Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Item_Id),
+                            Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Status)))
+                });
+
+                var loans = _database.GetCollection<LoansMongo>("Loans");
+                await loans.Indexes.CreateManyAsync(new[]
+                {
+                    new CreateIndexModel<LoansMongo>(Builders<LoansMongo>.IndexKeys.Ascending(x => x.Loaner_Id)),
+                    new CreateIndexModel<LoansMongo>(Builders<LoansMongo>.IndexKeys.Ascending(x => x.Status)),
+                    new CreateIndexModel<LoansMongo>(
+                        Builders<LoansMongo>.IndexKeys.Combine(
+                            Builders<LoansMongo>.IndexKeys.Ascending(x => x.Loaner_Id),
+                            Builders<LoansMongo>.IndexKeys.Ascending(x => x.Status)))
+                });
+
+                var reservations = _database.GetCollection<ReservationsMongo>("Reservations");
+                await reservations.Indexes.CreateManyAsync(new[]
+                {
+                    new CreateIndexModel<ReservationsMongo>(Builders<ReservationsMongo>.IndexKeys.Ascending(x => x.Loaner_Id)),
+                    new CreateIndexModel<ReservationsMongo>(Builders<ReservationsMongo>.IndexKeys.Ascending(x => x.Item_Id)),
+                    new CreateIndexModel<ReservationsMongo>(Builders<ReservationsMongo>.IndexKeys.Ascending(x => x.Status)),
+                    new CreateIndexModel<ReservationsMongo>(
+                        Builders<ReservationsMongo>.IndexKeys.Combine(
+                            Builders<ReservationsMongo>.IndexKeys.Ascending(x => x.Loaner_Id),
+                            Builders<ReservationsMongo>.IndexKeys.Ascending(x => x.Status)))
+                });
+
+                Console.WriteLine("MongoDB indexes created successfully!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to create MongoDB indexes: {ex.Message}");
+            }
+        }
     }
 }

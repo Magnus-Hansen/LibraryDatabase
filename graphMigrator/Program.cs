@@ -26,6 +26,8 @@ internal class Program
         await mongoDB.ClearCollection("Reservations");
         await mongoDB.InsertData("Reservations", mongoDB.TransformReservations());
 
+        await mongoDB.CreateIndexes();
+
 
     }
 }
