@@ -9,7 +9,7 @@ using System.Threading.Tasks;
     public class LoanersMongo
     {
         [BsonId]
-        public ObjectId Id { get; set; }   
+        public ObjectId _id { get; set; }   
      
         public string FirstName { get; set; }
         public string LastName { get; set; }
