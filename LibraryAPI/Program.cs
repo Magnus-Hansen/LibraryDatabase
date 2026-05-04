@@ -27,6 +27,9 @@ builder.Services.AddScoped<ILoanerRepository, LoanerRepository>();
 builder.Services.AddScoped<ILoanerService, LoanerService>();
 builder.Services.AddScoped<IPasswordHasher<Loaner>, PasswordHasher<Loaner>>();
 
+builder.Services.AddScoped<ILoanRepository, LoanRepository>();
+builder.Services.AddScoped<ILoanService, LoanService>();
+
 // JWT settings
 var jwtKey = builder.Configuration["Jwt:Key"]
              ?? throw new InvalidOperationException("Missing Jwt:Key");
