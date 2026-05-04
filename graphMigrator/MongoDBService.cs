@@ -26,7 +26,7 @@ namespace graphMigrator
             _database = _client.GetDatabase(_databaseName);
 
             mysqlService = new MySqlService(mysqlconnectionString);
-            
+            FetchData();
         }
 
         public string Connect()
@@ -48,6 +48,45 @@ namespace graphMigrator
 
         public IMongoDatabase Database => _database;
 
+        // MySQL Models
+        List<BoardGame> boardgameDetails;
+        List<Book> books;
+        List<Creator> creators;
+        List<Fine> fines;
+        List<Genre> genres;
+        List<Inventory> inventories;
+        List<Item> mySqlItems;
+        List<ItemCreator> itemCreators;
+        List<ItemGenre> itemGenres;
+        List<ItemTag> itemTags;
+        List<Language> languages;
+        List<Loan> loans;
+        List<Loaner> loaners;
+        List<Publisher> publishers;
+        List<Reservation> reservations;
+        List<Review> reviews;
+        List<Tag> tags;
+
+        private void FetchData()
+        {
+            boardgameDetails = mysqlService.GetBoardGames();
+            books = mysqlService.GetBooks();
+            creators = mysqlService.GetCreators();
+            fines = mysqlService.GetFines();
+            genres = mysqlService.GetGenres();
+            inventories = mysqlService.GetInventories();
+            mySqlItems = mysqlService.GetItems();
+            itemCreators = mysqlService.GetItemCreators();
+            itemGenres = mysqlService.GetItemGenres();
+            itemTags = mysqlService.GetItemTags();
+            languages = mysqlService.GetLanguages();
+            loans = mysqlService.GetLoans();
+            loaners = mysqlService.GetLoaners();
+            publishers = mysqlService.GetPublishers();
+            reservations = mysqlService.GetReservations();
+            reviews = mysqlService.GetReviews();
+            tags = mysqlService.GetTags();
+        }
 
         // Transform data to MongoDB models
         public bool TransformData()
@@ -73,7 +112,6 @@ namespace graphMigrator
         public List<ItemMongo> TransformItems()
         {
             // Turns MySQL Language into MongoDB LanguageMongo
-            List<Language> languages = mysqlService.GetLanguages();
             List<LanguageMongo> languageMongos = new List<LanguageMongo>();
             foreach (Language language in languages) {
                 LanguageMongo languageMongo = new LanguageMongo
@@ -84,7 +122,6 @@ namespace graphMigrator
                 languageMongos.Add(languageMongo);
             }
             // Turns MySQL Publisher into MongoDB PublisherMongo
-            List<Publisher> publishers = mysqlService.GetPublishers();
             List<PublisherMongo> publisherMongos = new List<PublisherMongo>();
             foreach (Publisher publisher in publishers)
             {
@@ -96,7 +133,6 @@ namespace graphMigrator
                 publisherMongos.Add(publisherMongo);
             }
             // Turns MySQL Creator into MongoDB CreatorMongo
-            List<Creator> creators = mysqlService.GetCreators();
             List<CreatorMongo> creatorMongos = new List<CreatorMongo>();
             foreach (Creator creator in creators)
             {
@@ -111,9 +147,7 @@ namespace graphMigrator
                 };
                 creatorMongos.Add(creatorMongo);
             }
-            List<ItemCreator> itemCreators = mysqlService.GetItemCreators();
             // Turns MySQL Genre into MongoDB GenreMongo
-            List<Genre> genres = mysqlService.GetGenres();
             List<GenreMongo> genreMongos = new List<GenreMongo>();
             foreach (Genre genre in genres)
             {
@@ -124,9 +158,7 @@ namespace graphMigrator
                 };
                 genreMongos.Add(genreMongo);
             }
-            List<ItemGenre> itemGenres = mysqlService.GetItemGenres();
             // Turns MySQL Tag into MongoDB TagMongo
-            List<Tag> tags = mysqlService.GetTags();
             List<TagMongo> tagMongos = new List<TagMongo>();
             foreach (Tag tag in tags)
             {
@@ -137,9 +169,7 @@ namespace graphMigrator
                 };
                 tagMongos.Add(tagMongo);
             }
-            List<ItemTag> itemTags = mysqlService.GetItemTags();
-            // Turns MySQL BookDetails into MongoDB BookDetailsMongo
-            List<Book> books = mysqlService.GetBooks();
+            // Turns MySQL BookDetails into MongoDB 
             List<BookDetailsMongo> bookDetailsMongos = new List<BookDetailsMongo>();
             foreach (Book book in books)
             {
@@ -152,7 +182,6 @@ namespace graphMigrator
                 bookDetailsMongos.Add(bookDetailsMongo);
             }
             // Turns MySQL BoardgameDetails into MongoDB BoardgameDetailsMongo
-            List<BoardGame> boardgameDetails = mysqlService.GetBoardGames();
             List<BoardgameDetailsMongo> boardgameDetailsMongos = new List<BoardgameDetailsMongo>();
             foreach (BoardGame boardgameDetail in boardgameDetails)
             {
@@ -168,8 +197,6 @@ namespace graphMigrator
             }
 
             // Turns MySQL Review into MongoDB ReviewMongo and also adds the Loaner name to the ReviewMongo
-            List<Review> reviews = mysqlService.GetReviews();
-            List<Loaner> loaners = mysqlService.GetLoaners();
             List<ReviewMongo> reviewMongos = new List<ReviewMongo>();
             foreach (Review review in reviews)
             {
@@ -188,13 +215,12 @@ namespace graphMigrator
             }
 
             // Turns MySQL Item into MongoDB ItemMongo and also adds the Language, Publisher, Creators, Genres, Tags, BookDetails, BoardgameDetails and Reviews to the ItemMongo
-            List<Item> mySqlItems = mysqlService.GetItems();
             List<ItemMongo> itemMongos = new List<ItemMongo>();
             foreach (Item item in mySqlItems)
             {
                 ItemMongo itemMongo = new ItemMongo
                 {
-                    Id = ObjectId.GenerateNewId(),
+                    _id = ObjectId.GenerateNewId(),
                     Name = item.Name,
                     MediaType = item.Media_type,
                     ReleaseYear = item.Release_year ?? 0,
@@ -237,13 +263,12 @@ namespace graphMigrator
         // Transforms Inventory from MySQL to MongoDB format
         public List<InventoryMongo> TransformInventory()
         {
-            List<Inventory> inventories = mysqlService.GetInventories();
             List<InventoryMongo> inventoryMongos = new List<InventoryMongo>();
             foreach (Inventory inventory in inventories)
             {
                 InventoryMongo inventoryMongo = new InventoryMongo
                 {
-                    Id = ObjectId.GenerateNewId(),
+                    _id = ObjectId.GenerateNewId(),
                     Item_Id = inventory.Item_id,
                     Barcode = inventory.Barcode,
                     Status = inventory.Status,
@@ -257,7 +282,6 @@ namespace graphMigrator
         // Transforms active loam from MySQL to MongoDB format, where id is the loaner id, used in TransformLoaners
         public List<ActiveLoansPreviewMongo> TransformActiveLoansPreview(int loanerId)
         {
-            var loans = mysqlService.GetLoans();
             var activeLoans = loans.Where(l => l.Status == "active" && l.Loaner_id == loanerId).ToList();
             List<ActiveLoansPreviewMongo> activeLoansPreviewMongos = new List<ActiveLoansPreviewMongo>();
             foreach (var activeLoan in activeLoans)
@@ -265,7 +289,7 @@ namespace graphMigrator
                 ActiveLoansPreviewMongo activeLoanPreviewMongo = new ActiveLoansPreviewMongo
                 {
                     LoanId = ObjectId.GenerateNewId(),
-                    Item_Name = mysqlService.GetItems().FirstOrDefault(i => i.Id == mysqlService.GetInventories().FirstOrDefault(inv => inv.Id == activeLoan.Inventory_id)?.Item_id)?.Name ?? "",
+                    Item_Name = mySqlItems.FirstOrDefault(i => i.Id == inventories.FirstOrDefault(inv => inv.Id == activeLoan.Inventory_id)?.Item_id)?.Name ?? "",
                     Due_Date = activeLoan.Due_date
                 };
                 activeLoansPreviewMongos.Add(activeLoanPreviewMongo);
@@ -275,7 +299,6 @@ namespace graphMigrator
         // Transforms active reservations from MySQL to MongoDB format, where id is the loaner id, used in TransformLoaners
         public List<ActiveReservationsPreviewMongo> TransformActiveReservationsPreview(int loanerId)
         {
-            var reservations = mysqlService.GetReservations();
             var activeReservations = reservations.Where(r => r.Status == "active" && r.Loaner_id == loanerId).ToList();
             List<ActiveReservationsPreviewMongo> activeReservationsPreviewMongos = new List<ActiveReservationsPreviewMongo>();
             foreach (var activeReservation in activeReservations)
@@ -284,7 +307,7 @@ namespace graphMigrator
                 {
                     ReservationId = ObjectId.GenerateNewId(),
                     ItemId = activeReservation.Item_id,
-                    ItemName = mysqlService.GetItems().FirstOrDefault(i => i.Id == activeReservation.Item_id)?.Name ?? "",
+                    ItemName = mySqlItems.FirstOrDefault(i => i.Id == activeReservation.Item_id)?.Name ?? "",
                     QueueNumber = activeReservation.Queue_number,
                     Status = activeReservation.Status
                 };
@@ -296,17 +319,15 @@ namespace graphMigrator
         public List<LoanersMongo> TransformLoaners()
         {
             // Filters active reservations to be used in the LoanersMongo transformation
-            var reservations = mysqlService.GetReservations();
             var activeReservations = reservations.Where(r => r.Status == "active").ToList();
 
             // Turns MySQL Loaner into MongoDB LoanerMongo
-            var loaners = mysqlService.GetLoaners();
             List<LoanersMongo> loanerMongos = new List<LoanersMongo>();
             foreach (Loaner loaner in loaners)
             {
                 LoanersMongo loanerMongo = new LoanersMongo
                 {
-                    Id = ObjectId.GenerateNewId(),
+                    _id = ObjectId.GenerateNewId(),
                     FirstName = loaner.First_name,
                     LastName = loaner.Last_name,
                     Email = loaner.Email,
@@ -325,9 +346,9 @@ namespace graphMigrator
         // Transform Fines from MySQL to MongoDB, used in TransformLoans
         public List<FineMongo> TransformFines(int loanId)
         {
-            var fines = mysqlService.GetFines().Where(f => f.Loan_id == loanId).ToList();
+            var mySqlFines = fines.Where(f => f.Loan_id == loanId).ToList();
             List<FineMongo> fineMongos = new List<FineMongo>();
-            foreach (var fine in fines)
+            foreach (var fine in mySqlFines)
             {
                 FineMongo fineMongo = new FineMongo
                 {
@@ -345,13 +366,12 @@ namespace graphMigrator
         // Transforms Loans from MySQL to MongoDB
         public List<LoansMongo> TransformLoans()
         {
-            var loans = mysqlService.GetLoans();
             List<LoansMongo> loansMongos = new List<LoansMongo>();
             foreach (var loan in loans)
             {
                 LoansMongo loanMongo = new LoansMongo
                 {
-                    Id = ObjectId.GenerateNewId(),
+                    _id = ObjectId.GenerateNewId(),
                     Loaner_Id = loan.Loaner_id,
                     InventoryId = loan.Inventory_id,
                     Loan_Date = loan.Loan_date,
@@ -361,12 +381,12 @@ namespace graphMigrator
 
                     Item_Snapshot = new ItemSnapshot
                     {
-                        Name = mysqlService.GetItems().FirstOrDefault(i => i.Id == mysqlService.GetInventories().FirstOrDefault(inv => inv.Id == loan.Inventory_id)?.Item_id)?.Name ?? "",
-                        MediaType = mysqlService.GetItems().FirstOrDefault(i => i.Id == mysqlService.GetInventories().FirstOrDefault(inv => inv.Id == loan.Inventory_id)?.Item_id)?.Media_type ?? ""
+                        Name = mySqlItems.FirstOrDefault(i => i.Id == inventories.FirstOrDefault(inv => inv.Id == loan.Inventory_id)?.Item_id)?.Name ?? "",
+                        MediaType = mySqlItems.FirstOrDefault(i => i.Id == inventories.FirstOrDefault(inv => inv.Id == loan.Inventory_id)?.Item_id)?.Media_type ?? ""
                     },
                     Inventory_Snapshot = new InventorySnapshot
                     {
-                        Barcode = mysqlService.GetInventories().FirstOrDefault(inv => inv.Id == loan.Inventory_id)?.Barcode ?? "",
+                        Barcode = inventories.FirstOrDefault(inv => inv.Id == loan.Inventory_id)?.Barcode ?? "",
                     },
                     Fines = TransformFines(loan.Id)
                 };
@@ -377,16 +397,15 @@ namespace graphMigrator
         // Transforms Reservations from MySQL to MongoDB
         public List<ReservationsMongo> TransformReservations()
         {
-            var reservations = mysqlService.GetReservations();
             List<ReservationsMongo> reservationsMongos = new List<ReservationsMongo>();
             foreach (var reservation in reservations)
             {
                 ReservationsMongo reservationMongo = new ReservationsMongo
                 {
-                    Id = ObjectId.GenerateNewId(),
+                    _id = ObjectId.GenerateNewId(),
                     Loaner_Id = reservation.Loaner_id,
                     Item_Id = reservation.Item_id,
-                    Item_Name = mysqlService.GetItems().FirstOrDefault(i => i.Id == reservation.Item_id)?.Name ?? "",
+                    Item_Name = mySqlItems.FirstOrDefault(i => i.Id == reservation.Item_id)?.Name ?? "",
                     Created_At = DateTime.Now, // We have no prior info, so we set current time instead of null
                     Status = reservation.Status
                 };
