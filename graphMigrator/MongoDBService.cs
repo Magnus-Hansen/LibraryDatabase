@@ -424,12 +424,13 @@ namespace graphMigrator
             }
         }
 
-        // Create the indexes that support the most common MongoDB query patterns.
+        // Create a lean index set aligned with the core SQL query patterns.
         public async Task CreateIndexes()
         {
             try
             {
                 var items = _database.GetCollection<ItemMongo>("Items");
+                await items.Indexes.DropAllAsync();
                 await items.Indexes.CreateManyAsync(new[]
                 {
                     new CreateIndexModel<ItemMongo>(Builders<ItemMongo>.IndexKeys.Ascending(x => x.Name)),
@@ -437,24 +438,18 @@ namespace graphMigrator
                 });
 
                 var loaners = _database.GetCollection<LoanersMongo>("Loaners");
+                await loaners.Indexes.DropAllAsync();
                 await loaners.Indexes.CreateManyAsync(new[]
                 {
                     new CreateIndexModel<LoanersMongo>(
                         Builders<LoanersMongo>.IndexKeys.Ascending(x => x.Email),
-                        new CreateIndexOptions { Unique = true }),
-                    new CreateIndexModel<LoanersMongo>(
-                        Builders<LoanersMongo>.IndexKeys.Ascending(x => x.Cpr),
                         new CreateIndexOptions { Unique = true })
                 });
 
                 var inventories = _database.GetCollection<InventoryMongo>("Inventories");
+                await inventories.Indexes.DropAllAsync();
                 await inventories.Indexes.CreateManyAsync(new[]
                 {
-                    new CreateIndexModel<InventoryMongo>(
-                        Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Barcode),
-                        new CreateIndexOptions { Unique = true }),
-                    new CreateIndexModel<InventoryMongo>(Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Item_Id)),
-                    new CreateIndexModel<InventoryMongo>(Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Status)),
                     new CreateIndexModel<InventoryMongo>(
                         Builders<InventoryMongo>.IndexKeys.Combine(
                             Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Item_Id),
@@ -462,27 +457,18 @@ namespace graphMigrator
                 });
 
                 var loans = _database.GetCollection<LoansMongo>("Loans");
+                await loans.Indexes.DropAllAsync();
                 await loans.Indexes.CreateManyAsync(new[]
                 {
-                    new CreateIndexModel<LoansMongo>(Builders<LoansMongo>.IndexKeys.Ascending(x => x.Loaner_Id)),
-                    new CreateIndexModel<LoansMongo>(Builders<LoansMongo>.IndexKeys.Ascending(x => x.Status)),
                     new CreateIndexModel<LoansMongo>(
                         Builders<LoansMongo>.IndexKeys.Combine(
                             Builders<LoansMongo>.IndexKeys.Ascending(x => x.Loaner_Id),
                             Builders<LoansMongo>.IndexKeys.Ascending(x => x.Status)))
                 });
 
+                // No custom reservation indexes in the lean profile.
                 var reservations = _database.GetCollection<ReservationsMongo>("Reservations");
-                await reservations.Indexes.CreateManyAsync(new[]
-                {
-                    new CreateIndexModel<ReservationsMongo>(Builders<ReservationsMongo>.IndexKeys.Ascending(x => x.Loaner_Id)),
-                    new CreateIndexModel<ReservationsMongo>(Builders<ReservationsMongo>.IndexKeys.Ascending(x => x.Item_Id)),
-                    new CreateIndexModel<ReservationsMongo>(Builders<ReservationsMongo>.IndexKeys.Ascending(x => x.Status)),
-                    new CreateIndexModel<ReservationsMongo>(
-                        Builders<ReservationsMongo>.IndexKeys.Combine(
-                            Builders<ReservationsMongo>.IndexKeys.Ascending(x => x.Loaner_Id),
-                            Builders<ReservationsMongo>.IndexKeys.Ascending(x => x.Status)))
-                });
+                await reservations.Indexes.DropAllAsync();
 
                 Console.WriteLine("MongoDB indexes created successfully!");
             }
