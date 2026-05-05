@@ -30,7 +30,7 @@ namespace graphMigrator
             }
         }
 
-        public async Task DeleteConstraint(IAsyncTransaction transaction)
+        public async Task DeleteConstraintIndex(IAsyncTransaction transaction)
         {
             var constraintName = await transaction.RunAsync("SHOW CONSTRAINTS YIELD name");
             var constraints = new List<string>();

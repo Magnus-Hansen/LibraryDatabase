@@ -14,7 +14,7 @@ internal class Program
 
         await neo4j.ExecuteInTransaction(async transaction =>
         {
-            await neo4j.DeleteConstraint(transaction);
+            await neo4j.DeleteConstraintIndex(transaction);
         });
         await neo4j.ExecuteInTransaction(async transaction =>
         {
