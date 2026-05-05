@@ -335,7 +335,7 @@ namespace graphMigrator
             },
             {
                 "Loan_due_date",
-                "CREATE INDEX rangeIndex_loan_dueDate FOR (n:Item) ON (n.due_date)"
+                "CREATE INDEX rangeIndex_loan_dueDate FOR (n:Loan) ON (n.due_date)"
             },
             {
                 "Fine_due_date",
@@ -351,11 +351,11 @@ namespace graphMigrator
             },
             {
                 "Loaner_name",
-                "CREATE FULLTEXT INDEX fulltextIndex_loanerName FOR (l:loaner) ON EACH [l.first_name, l.last_name]"
+                "CREATE FULLTEXT INDEX fulltextIndex_loanerName FOR (l:Loaner) ON EACH [l.first_name, l.last_name]"
             },
             {
                 "Creator_name",
-                "CREATE FULLTEXT INDEX fulltextIndex_creatorName FOR (c:creator) ON EACH [c.first_name, c.last_name]"
+                "CREATE FULLTEXT INDEX fulltextIndex_creatorName FOR (c:Creator) ON EACH [c.first_name, c.last_name]"
             },
             {
                 "Language_language",
