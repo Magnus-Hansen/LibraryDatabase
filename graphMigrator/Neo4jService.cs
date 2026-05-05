@@ -1,5 +1,4 @@
-﻿using graphMigrator.Models;
-using Neo4j.Driver;
+﻿using Neo4j.Driver;
 
 namespace graphMigrator
 {
@@ -31,16 +30,51 @@ namespace graphMigrator
             }
         }
 
-        public async Task DeleteEverything(IAsyncTransaction transaction)
+        public async Task DeleteConstraint(IAsyncTransaction transaction)
+        {
+            var constraintName = await transaction.RunAsync("SHOW CONSTRAINTS YIELD name");
+            var constraints = new List<string>();
+
+            await constraintName.ForEachAsync(record =>
+            {
+                constraints.Add(record["name"].As<string>());
+            });
+
+            foreach (var name in constraints)
+            {
+                var cursor = await transaction.RunAsync($"DROP CONSTRAINT {name}");
+                await cursor.ConsumeAsync();
+            }
+
+            var indexName = await transaction.RunAsync("SHOW INDEXES YIELD name");
+            var indexes = new List<string>();
+            await indexName.ForEachAsync(record =>
+            {
+                indexes.Add(record["name"].As<string>());
+            });
+            foreach (var name in indexes)
+            {
+                var cursor = await transaction.RunAsync($"DROP INDEX {name}");
+                await cursor.ConsumeAsync();
+            }
+        }
+        public async Task DeleteNodes(IAsyncTransaction transaction)
         {
             var query = @"MATCH (n) DETACH DELETE n";
 
-            await transaction.RunAsync(query);
+            var cursor = await transaction.RunAsync(query);
+            await cursor.ConsumeAsync();
         }
 
         public async Task Neo4jExecute<T>(IAsyncTransaction transaction, List<T> objects, string query)
         {
-            await transaction.RunAsync(query, new { objects });
+            var cursor = await transaction.RunAsync(query, new { objects });
+            await cursor.ConsumeAsync();
+        }
+        public async Task Neo4jExecute(IAsyncTransaction transaction, string query)
+        {
+            var cursor = await transaction.RunAsync(query);
+            await cursor.ConsumeAsync();
         }
         public Dictionary<string, string> nodeQueries = new Dictionary<string, string>
         {
@@ -212,6 +246,136 @@ namespace graphMigrator
                 @"UNWIND $objects AS l
                 MATCH (lo:loan {id: l.Id}), (in:inventory {id: l.Inventory_id})
                 MERGE (lo)-[:LOANS_FROM]->(in)"
+            }
+        };
+        public Dictionary<string, string> Constraint = new Dictionary<string, string>
+        {
+            {
+                "Loaner_id",
+                "CREATE CONSTRAINT Loaner_id FOR (loaner:Loaner) REQUIRE loaner.id IS UNIQUE;"
+            },
+            {
+                "Loaner_email",
+                "CREATE CONSTRAINT Loaner_email FOR (loaner:Loaner) REQUIRE loaner.email IS UNIQUE;"
+            },
+            {
+                "Language_id",
+                "CREATE CONSTRAINT Language_id FOR (language:Language) REQUIRE language.id IS UNIQUE;"
+            },
+            {
+                "Item_id",
+                "CREATE CONSTRAINT Item_id FOR (item:Item) REQUIRE item.id IS UNIQUE;"
+            },
+            {
+                "Creator_id",
+                "CREATE CONSTRAINT Creator_id FOR (creator:Creator) REQUIRE creator.id IS UNIQUE;"
+            },
+            {
+                "Publisher_id",
+                "CREATE CONSTRAINT Publisher_id FOR (publisher:Publisher) REQUIRE publisher.id IS UNIQUE;"
+            },
+            {
+                "Book_id",
+                "CREATE CONSTRAINT Book_id FOR (book:Book) REQUIRE book.id IS UNIQUE;"
+            },
+            {
+                "Genre_id",
+                "CREATE CONSTRAINT Genre_id FOR (genre:Genre) REQUIRE genre.id IS UNIQUE;"
+            },
+            {
+                "Tag_id",
+                "CREATE CONSTRAINT Tag_id FOR (tag:Tag) REQUIRE tag.id IS UNIQUE;"
+            },
+            {
+                "Inventory_id",
+                "CREATE CONSTRAINT Inventory_id FOR (inventory:Inventory) REQUIRE inventory.id IS UNIQUE;"
+            },
+            {
+                "Loan_id",
+                "CREATE CONSTRAINT Loan_id FOR (loan:Loan) REQUIRE loan.id IS UNIQUE;"
+            },
+            {
+                "Reservation_id",
+                "CREATE CONSTRAINT Reservation_id FOR (reservation:Reservation) REQUIRE reservation.id IS UNIQUE;"
+            },
+            {
+                "Fine_id",
+                "CREATE CONSTRAINT Fine_id FOR (fine:Fine) REQUIRE fine.id IS UNIQUE;"
+            },
+            {
+                "Boardgame_id",
+                "CREATE CONSTRAINT Boardgame_id FOR (boardgame:Boardgame) REQUIRE boardgame.id IS UNIQUE;"
+            },
+            {
+                "Tag_name",
+                "CREATE CONSTRAINT tag_name FOR (tag:Tag) REQUIRE tag.name IS UNIQUE;"
+            },
+            {
+                "Genre_name",
+                "CREATE CONSTRAINT genre_name FOR (genre:Genre) REQUIRE genre.name IS UNIQUE;"
+            },
+            {
+                "Book_ISBN",
+                "CREATE CONSTRAINT book_ISBN FOR (book:Book) REQUIRE book.isbn IS UNIQUE"
+            },
+            {
+                "Language_name",
+                "CREATE CONSTRAINT language_name FOR (language:Language) REQUIRE language.language IS UNIQUE"
+            },
+            {
+                "Publisher_name",
+                "CREATE CONSTRAINT publisher_name FOR (publisher:Publisher) REQUIRE publisher.name IS UNIQUE"
+            }
+        };
+        public Dictionary<string, string> Indexes = new Dictionary<string, string>
+        {
+            {
+                "Item_release_year",
+                "CREATE INDEX rangeIndex_item_releaseYear FOR (n:Item) ON (n.release_year)"
+            },
+            {
+                "Loan_due_date",
+                "CREATE INDEX rangeIndex_loan_dueDate FOR (n:Item) ON (n.due_date)"
+            },
+            {
+                "Fine_due_date",
+                "CREATE INDEX rangeIndex_fine_dueDate FOR (n:Fine) ON (n.due_date)"
+            },
+            {
+                "Item_name",
+                "CREATE TEXT INDEX textIndex_item_name FOR (n:Item) ON (n.name)"
+            },
+            {
+                "Item_mediaType",
+                "CREATE TEXT INDEX textIndex_item_mediaType FOR (n:Item) ON (n.media_type)"
+            },
+            {
+                "Loaner_name",
+                "CREATE FULLTEXT INDEX fulltextIndex_loanerName FOR (l:loaner) ON EACH [l.first_name, l.last_name]"
+            },
+            {
+                "Creator_name",
+                "CREATE FULLTEXT INDEX fulltextIndex_creatorName FOR (c:creator) ON EACH [c.first_name, c.last_name]"
+            },
+            {
+                "Language_language",
+                "CREATE TEXT INDEX textIndex_language_language FOR (n:Language) ON (n.language)"
+            },
+            {
+                "Publisher_name",
+                "CREATE TEXT INDEX textIndex_publisher_name FOR (n:Publisher) ON (n.name)"
+            },
+            {
+                "Genre_name",
+                "CREATE TEXT INDEX textIndex_genre_name FOR (n:Genre) ON (n.name)"
+            },
+            {
+                "Tag_name",
+                "CREATE TEXT INDEX textIndex_tag_name FOR (n:Tag) ON (n.name)"
+            },
+            {
+                "Book_ISBN",
+                "CREATE TEXT INDEX textIndex_book_ISBN FOR (n:Book) ON (n.ISBN)"
             }
         };
     }

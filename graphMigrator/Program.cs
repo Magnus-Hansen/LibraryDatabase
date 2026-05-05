@@ -9,10 +9,27 @@ internal class Program
         var mysql = new MySqlService(secret.MySqlConnectionString);
         var neo4j = new Neo4jService(secret.Neo4jUri, secret.Neo4jUser, secret.Neo4jPassword, secret.Neo4jDatabase);
         var neo4jQueries = neo4j.nodeQueries;
+        var neo4jConstraints = neo4j.Constraint;
+        var neo4jIndexes = neo4j.Indexes;
 
         await neo4j.ExecuteInTransaction(async transaction =>
         {
-            await neo4j.DeleteEverything(transaction);
+            await neo4j.DeleteConstraint(transaction);
+        });
+        await neo4j.ExecuteInTransaction(async transaction =>
+        {
+            foreach (var constraint in neo4jConstraints.Values)
+            {
+                await neo4j.Neo4jExecute(transaction, constraint);
+            }
+            foreach (var query in neo4jIndexes.Values)
+            {
+                await neo4j.Neo4jExecute(transaction, query);
+            }
+        });
+        await neo4j.ExecuteInTransaction(async transaction =>
+        {
+            await neo4j.DeleteNodes(transaction);
             await neo4j.Neo4jExecute(transaction, mysql.GetLoaners(), neo4jQueries["Loaner"]);
             await neo4j.Neo4jExecute(transaction, mysql.GetLanguages(), neo4jQueries["Language"]);
             await neo4j.Neo4jExecute(transaction, mysql.GetItems(), neo4jQueries["Item"]);
