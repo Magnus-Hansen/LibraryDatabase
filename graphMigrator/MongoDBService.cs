@@ -48,6 +48,27 @@ namespace graphMigrator
 
         public IMongoDatabase Database => _database;
 
+        public async Task EnsureConstraintsAsync()
+        {
+            await EnsureCollectionExistsAsync("Items");
+            await EnsureCollectionExistsAsync("Inventories");
+            await EnsureCollectionExistsAsync("Loaners");
+            await EnsureCollectionExistsAsync("Loans");
+            await EnsureCollectionExistsAsync("Reservations");
+            await CreateIndexes();
+        }
+
+        private async Task EnsureCollectionExistsAsync(string collectionName)
+        {
+            var filter = new BsonDocument("name", collectionName);
+            var collections = await _database.ListCollectionNamesAsync(new ListCollectionNamesOptions { Filter = filter });
+            var exists = await collections.AnyAsync();
+            if (exists)
+                return;
+
+            await _database.CreateCollectionAsync(collectionName);
+        }
+
 
         // Transform data to MongoDB models
         public bool TransformData()
@@ -236,6 +257,7 @@ namespace graphMigrator
         public List<InventoryMongo> TransformInventory()
         {
             List<Inventory> inventories = mysqlService.GetInventories();
+            var itemsById = mysqlService.GetItems().ToDictionary(i => i.Id, i => i.Name ?? "");
             List<InventoryMongo> inventoryMongos = new List<InventoryMongo>();
             foreach (Inventory inventory in inventories)
             {
@@ -243,6 +265,7 @@ namespace graphMigrator
                 {
                     Id = ObjectId.GenerateNewId(),
                     Item_Id = inventory.Item_id,
+                    Item_Name = itemsById.TryGetValue(inventory.Item_id, out var name) ? name : "",
                     Barcode = inventory.Barcode,
                     Status = inventory.Status,
                     Placement = inventory.Placement ?? ""
@@ -415,7 +438,7 @@ namespace graphMigrator
             try
             {
                 var collection = _database.GetCollection<T>(collectionName);
-                collection.InsertMany(data);
+                await collection.InsertManyAsync(data);
                 Console.WriteLine($"Data inserted into MongoDB collection '{collectionName}' successfully!");
             }
             catch (Exception ex)
@@ -434,7 +457,14 @@ namespace graphMigrator
                 await items.Indexes.CreateManyAsync(new[]
                 {
                     new CreateIndexModel<ItemMongo>(Builders<ItemMongo>.IndexKeys.Ascending(x => x.Name)),
-                    new CreateIndexModel<ItemMongo>(Builders<ItemMongo>.IndexKeys.Ascending(x => x.MediaType))
+                    new CreateIndexModel<ItemMongo>(Builders<ItemMongo>.IndexKeys.Ascending(x => x.MediaType)),
+                    new CreateIndexModel<ItemMongo>(
+                        Builders<ItemMongo>.IndexKeys.Ascending("BookDetails.ISBN"),
+                        new CreateIndexOptions
+                        {
+                            Unique = true,
+                            Sparse = true
+                        })
                 });
 
                 var loaners = _database.GetCollection<LoanersMongo>("Loaners");
@@ -443,6 +473,9 @@ namespace graphMigrator
                 {
                     new CreateIndexModel<LoanersMongo>(
                         Builders<LoanersMongo>.IndexKeys.Ascending(x => x.Email),
+                        new CreateIndexOptions { Unique = true }),
+                    new CreateIndexModel<LoanersMongo>(
+                        Builders<LoanersMongo>.IndexKeys.Ascending(x => x.Cpr),
                         new CreateIndexOptions { Unique = true })
                 });
 
@@ -450,6 +483,9 @@ namespace graphMigrator
                 await inventories.Indexes.DropAllAsync();
                 await inventories.Indexes.CreateManyAsync(new[]
                 {
+                    new CreateIndexModel<InventoryMongo>(
+                        Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Barcode),
+                        new CreateIndexOptions { Unique = true }),
                     new CreateIndexModel<InventoryMongo>(
                         Builders<InventoryMongo>.IndexKeys.Combine(
                             Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Item_Id),
