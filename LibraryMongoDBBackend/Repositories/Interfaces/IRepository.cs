@@ -10,13 +10,13 @@ namespace LibraryMongoDBBackend.Repositories.Interfaces
     {
         Task<T> CreateAsync(T entity);
 
-        // Invalid needs new implementation with ObjectId
-        //Task<T?> GetByIdAsync(string id);
+       
+        Task<T?> GetByIdAsync(int id);
 
         Task<List<T>> GetAllAsync();
 
-        Task<bool> UpdateAsync(string id, T entity);
+        Task<bool> UpdateAsync(int id, T entity);
 
-        Task<bool> DeleteAsync(string id);
+        Task<bool> DeleteAsync(int id);
     }
 }

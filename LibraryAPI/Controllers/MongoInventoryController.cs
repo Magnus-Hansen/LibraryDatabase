@@ -1,17 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-
 namespace LibraryAPI.Controllers;
 
-[Route("api/mongo/items")]
+[Route("api/mongo/inventory")]
 [ApiController]
-public class MongoItemsController : ControllerBase
+public class MongoInventoryController : ControllerBase
 {
-    private readonly MongoRepository<ItemMongo> _repository;
+    private readonly MongoRepository<InventoryMongo> _repository;
 
-    public MongoItemsController(MongoDbContext context)
+    public MongoInventoryController(MongoDbContext context)
     {
-        _repository = new MongoRepository<ItemMongo>(context, "Items");
+        _repository = new MongoRepository<InventoryMongo>(context, "Inventory");
     }
 
     [HttpGet]
@@ -23,25 +22,25 @@ public class MongoItemsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var item = await _repository.GetByIdAsync(id);
+        var inventory = await _repository.GetByIdAsync(id);
 
-        if (item == null)
+        if (inventory == null)
             return NotFound();
 
-        return Ok(item);
+        return Ok(inventory);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ItemMongo item)
+    public async Task<IActionResult> Create(InventoryMongo inventory)
     {
-        var created = await _repository.CreateAsync(item);
+        var created = await _repository.CreateAsync(inventory);
         return Ok(created);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, ItemMongo item)
+    public async Task<IActionResult> Update(int id, InventoryMongo inventory)
     {
-        var updated = await _repository.UpdateAsync(id, item);
+        var updated = await _repository.UpdateAsync(id, inventory);
 
         if (!updated)
             return NotFound();

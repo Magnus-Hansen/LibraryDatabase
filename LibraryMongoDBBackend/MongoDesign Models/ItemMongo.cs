@@ -4,8 +4,8 @@ using MongoDB.Bson.Serialization.Attributes;
 public class ItemMongo
 {
     [BsonId]
-    public ObjectId Id { get; set; }
-
+    public ObjectId _id { get; set; }
+    public int Id { get; set; }
     public string Name { get; set; }
     public string MediaType { get; set; } // "book" | "boardgame"
 

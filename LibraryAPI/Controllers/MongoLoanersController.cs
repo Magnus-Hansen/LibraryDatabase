@@ -20,10 +20,10 @@ namespace LibraryAPI.Controllers;
             return Ok(await _repository.GetAllAsync());
         }
 
-        // Needs new implementation
-        /*
+        
+        
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(string id)
+        public async Task<IActionResult> GetById(int id)
         {
             var loaner = await _repository.GetByIdAsync(id);
 
@@ -32,7 +32,7 @@ namespace LibraryAPI.Controllers;
 
             return Ok(loaner);
         }
-        */
+        
 
         [HttpPost]
         public async Task<IActionResult> Create(LoanersMongo loaner)
@@ -42,7 +42,7 @@ namespace LibraryAPI.Controllers;
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, LoanersMongo loaner)
+        public async Task<IActionResult> Update(int id, LoanersMongo loaner)
         {
             var updated = await _repository.UpdateAsync(id, loaner);
 
@@ -53,7 +53,7 @@ namespace LibraryAPI.Controllers;
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _repository.DeleteAsync(id);
 

@@ -10,7 +10,8 @@ using System.Threading.Tasks;
     public class InventoryMongo
     {
         [BsonId]
-        public ObjectId Id { get; set; }
+        public ObjectId _id { get; set; }
+        public int Id { get; set; }
 
         public int Item_Id { get; set; }
 

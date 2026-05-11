@@ -11,8 +11,9 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
     public class LoansMongo
     {
         [BsonId]
-        public ObjectId Id { get; set; }
-        public int Loaner_Id { get; set; }
+        public ObjectId _id { get; set; }
+        public int Id { get; set; }
+    public int Loaner_Id { get; set; }
         public int InventoryId { get; set; }
 
         public DateTime Loan_Date { get; set; }

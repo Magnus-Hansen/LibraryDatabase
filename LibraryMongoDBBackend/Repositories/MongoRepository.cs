@@ -20,32 +20,33 @@ public class MongoRepository<T> : IRepository<T>
         return entity;
     }
 
-    // INVALID OPERATION WITH MONGODB ID
-
-    //public async Task<T?> GetByIdAsync(string id)
-    //{
-    //    var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
-    //    return await _collection.Find(filter).FirstOrDefaultAsync();
-    //}
+    public async Task<T?> GetByIdAsync(int id)
+    {
+        var filter = Builders<T>.Filter.Eq("Id", id);
+        return await _collection.Find(filter).FirstOrDefaultAsync();
+    }
 
     public async Task<List<T>> GetAllAsync()
     {
         return await _collection.Find(_ => true).ToListAsync();
     }
 
-    public async Task<bool> UpdateAsync(string id, T entity)
+    public async Task<bool> UpdateAsync(int id, T entity)
     {
-        var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
+        var filter = Builders<T>.Filter.Eq("Id", id); 
+        
         var result = await _collection.ReplaceOneAsync(filter, entity);
 
         return result.ModifiedCount > 0;
     }
 
-    public async Task<bool> DeleteAsync(string id)
+    public async Task<bool> DeleteAsync(int id)
     {
-        var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
+        var filter = Builders<T>.Filter.Eq("Id", id);
         var result = await _collection.DeleteOneAsync(filter);
 
         return result.DeletedCount > 0;
     }
+
+
 }
