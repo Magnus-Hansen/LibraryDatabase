@@ -20,16 +20,18 @@ public class MongoItemsController : ControllerBase
         return Ok(await _repository.GetAllAsync());
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(string id)
-    {
-        var item = await _repository.GetByIdAsync(id);
+    // Needs new implementation
 
-        if (item == null)
-            return NotFound();
+    //[HttpGet("{id}")]
+    //public async Task<IActionResult> GetById(string id)
+    //{
+    //    var item = await _repository.GetByIdAsync(id);
 
-        return Ok(item);
-    }
+    //    if (item == null)
+    //        return NotFound();
+
+    //    return Ok(item);
+    //}
 
     [HttpPost]
     public async Task<IActionResult> Create(ItemMongo item)

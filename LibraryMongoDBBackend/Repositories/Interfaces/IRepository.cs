@@ -10,7 +10,8 @@ namespace LibraryMongoDBBackend.Repositories.Interfaces
     {
         Task<T> CreateAsync(T entity);
 
-        Task<T?> GetByIdAsync(string id);
+        // Invalid needs new implementation with ObjectId
+        //Task<T?> GetByIdAsync(string id);
 
         Task<List<T>> GetAllAsync();
 

@@ -20,11 +20,13 @@ public class MongoRepository<T> : IRepository<T>
         return entity;
     }
 
-    public async Task<T?> GetByIdAsync(string id)
-    {
-        var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
-        return await _collection.Find(filter).FirstOrDefaultAsync();
-    }
+    // INVALID OPERATION WITH MONGODB ID
+
+    //public async Task<T?> GetByIdAsync(string id)
+    //{
+    //    var filter = Builders<T>.Filter.Eq("_id", ObjectId.Parse(id));
+    //    return await _collection.Find(filter).FirstOrDefaultAsync();
+    //}
 
     public async Task<List<T>> GetAllAsync()
     {
