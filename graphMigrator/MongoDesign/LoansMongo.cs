@@ -12,7 +12,8 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
     {
         [BsonId]
         public ObjectId _id { get; set; }
-        public int Loaner_Id { get; set; }
+        public int Id { get; set; } // This is the Id from the SQL database, not the MongoDB _id
+    public int Loaner_Id { get; set; }
         public int InventoryId { get; set; }
 
         public DateTime Loan_Date { get; set; }

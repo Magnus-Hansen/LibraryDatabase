@@ -10,8 +10,9 @@ using System.Threading.Tasks;
     {
         [BsonId]
         public ObjectId _id { get; set; }   
-     
-        public string FirstName { get; set; }
+        public int Id { get; set; } // This is the Id from the SQL database, not the MongoDB _id
+
+    public string FirstName { get; set; }
         public string LastName { get; set; }
 
         public string Cpr { get; set; }

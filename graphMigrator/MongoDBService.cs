@@ -221,6 +221,7 @@ namespace graphMigrator
                 ItemMongo itemMongo = new ItemMongo
                 {
                     _id = ObjectId.GenerateNewId(),
+                    Id = item.Id, // This is the Id from the SQL database, not the MongoDB _id
                     Name = item.Name,
                     MediaType = item.Media_type,
                     ReleaseYear = item.Release_year ?? 0,
@@ -269,6 +270,7 @@ namespace graphMigrator
                 InventoryMongo inventoryMongo = new InventoryMongo
                 {
                     _id = ObjectId.GenerateNewId(),
+                    Id = inventory.Id, // This is the Id from the SQL database, not the MongoDB _id
                     Item_Id = inventory.Item_id,
                     Barcode = inventory.Barcode,
                     Status = inventory.Status,
@@ -328,6 +330,7 @@ namespace graphMigrator
                 LoanersMongo loanerMongo = new LoanersMongo
                 {
                     _id = ObjectId.GenerateNewId(),
+                    Id = loaner.Id, // This is the Id from the SQL database, not the MongoDB _id
                     FirstName = loaner.First_name,
                     LastName = loaner.Last_name,
                     Email = loaner.Email,
@@ -372,6 +375,7 @@ namespace graphMigrator
                 LoansMongo loanMongo = new LoansMongo
                 {
                     _id = ObjectId.GenerateNewId(),
+                    Id = loan.Id, // This is the Id from the SQL database, not the MongoDB _id
                     Loaner_Id = loan.Loaner_id,
                     InventoryId = loan.Inventory_id,
                     Loan_Date = loan.Loan_date,
@@ -403,6 +407,7 @@ namespace graphMigrator
                 ReservationsMongo reservationMongo = new ReservationsMongo
                 {
                     _id = ObjectId.GenerateNewId(),
+                    Id = reservation.Id, // This is the Id from the SQL database, not the MongoDB _id
                     Loaner_Id = reservation.Loaner_id,
                     Item_Id = reservation.Item_id,
                     Item_Name = mySqlItems.FirstOrDefault(i => i.Id == reservation.Item_id)?.Name ?? "",

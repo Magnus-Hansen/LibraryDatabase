@@ -5,6 +5,7 @@ public class ItemMongo
 {
     [BsonId]
     public ObjectId _id { get; set; }
+    public int Id { get; set; } // This is the Id from the SQL database, not the MongoDB _id
 
     public string Name { get; set; }
     public string MediaType { get; set; } // "book" | "boardgame"
