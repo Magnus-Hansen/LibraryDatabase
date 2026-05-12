@@ -1,6 +1,5 @@
 using LibraryAPI.Services;
 using LibraryAPI.Services.Interfaces;
-using LibrarySQLBackend.Context;
 using LibrarySQLBackend.Models;
 using LibrarySQLBackend.Repositories;
 using LibrarySQLBackend.Repositories.Interfaces;
@@ -10,6 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Neo4j.Driver;
+using graphBackend.Repositories;
+using LibrarySQLBackend.Context;
+using graphBackend.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,17 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+
+builder.Services.AddSingleton<IDriver>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+
+    return GraphDatabase.Driver(
+        config["Neo4j:Uri"],
+        AuthTokens.Basic(
+            config["Neo4j:User"],
+            config["Neo4j:Password"]));
+});
 
 // Repositories + services
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
@@ -29,6 +43,10 @@ builder.Services.AddScoped<IPasswordHasher<Loaner>, PasswordHasher<Loaner>>();
 
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 builder.Services.AddScoped<ILoanService, LoanService>();
+
+builder.Services.AddScoped<ILoanRepositoryGraph, LoanRepositoryGraph>();
+builder.Services.AddScoped<ILoanerRepositoryGraph, LoanerRepositoryGraph>();
+builder.Services.AddScoped<IItemRepositoryGraph, ItemRepositoryGraph>();
 
 // JWT settings
 var jwtKey = builder.Configuration["Jwt:Key"]
