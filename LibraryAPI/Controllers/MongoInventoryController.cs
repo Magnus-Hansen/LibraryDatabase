@@ -40,6 +40,8 @@ public class MongoInventoryController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, InventoryMongo inventory)
     {
+        var existing = await _repository.GetByIdAsync(id);
+        inventory._id = existing._id; // Preserve the MongoDB ObjectId for the update
         var updated = await _repository.UpdateAsync(id, inventory);
 
         if (!updated)
@@ -56,6 +58,6 @@ public class MongoInventoryController : ControllerBase
         if (!deleted)
             return NotFound();
 
-        return NoContent();
+        return Ok();
     }
 }

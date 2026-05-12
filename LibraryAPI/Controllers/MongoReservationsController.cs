@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LibrarySQLBackend.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAPI.Controllers;
 
@@ -40,6 +41,8 @@ public class MongoReservationsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, ReservationsMongo reservation)
     {
+        var existing = await _repository.GetByIdAsync(id);
+        reservation._id = existing._id; // Preserve the MongoDB ObjectId for the update
         var updated = await _repository.UpdateAsync(id, reservation);
 
         if (!updated)
@@ -56,6 +59,6 @@ public class MongoReservationsController : ControllerBase
         if (!deleted)
             return NotFound();
 
-        return NoContent();
+        return Ok();
     }
 }

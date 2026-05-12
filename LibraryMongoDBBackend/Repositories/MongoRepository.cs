@@ -33,8 +33,8 @@ public class MongoRepository<T> : IRepository<T>
 
     public async Task<bool> UpdateAsync(int id, T entity)
     {
-        var filter = Builders<T>.Filter.Eq("Id", id); 
-        
+        var filter = Builders<T>.Filter.Eq("Id", id);
+
         var result = await _collection.ReplaceOneAsync(filter, entity);
 
         return result.ModifiedCount > 0;

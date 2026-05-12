@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LibrarySQLBackend.Models;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace LibraryAPI.Controllers;
@@ -44,7 +45,9 @@ namespace LibraryAPI.Controllers;
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, LoanersMongo loaner)
         {
-            var updated = await _repository.UpdateAsync(id, loaner);
+        var existing = await _repository.GetByIdAsync(id);
+        loaner._id = existing._id; // Preserve the MongoDB ObjectId for the update
+        var updated = await _repository.UpdateAsync(id, loaner);
 
             if (!updated)
                 return NotFound();
@@ -60,7 +63,7 @@ namespace LibraryAPI.Controllers;
             if (!deleted)
                 return NotFound();
 
-            return NoContent();
+            return Ok();
         }
     
 }

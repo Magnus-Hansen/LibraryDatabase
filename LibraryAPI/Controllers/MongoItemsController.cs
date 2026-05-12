@@ -41,12 +41,14 @@ public class MongoItemsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, ItemMongo item)
     {
+        var existingItem = await _repository.GetByIdAsync(id);
+        item._id = existingItem._id; // Preserve the MongoDB ObjectId
         var updated = await _repository.UpdateAsync(id, item);
 
         if (!updated)
             return NotFound();
 
-        return NoContent();
+        return Ok(item);
     }
 
     [HttpDelete("{id}")]
@@ -57,6 +59,6 @@ public class MongoItemsController : ControllerBase
         if (!deleted)
             return NotFound();
 
-        return NoContent();
+        return Ok();
     }
 }
