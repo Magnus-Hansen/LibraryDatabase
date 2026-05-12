@@ -8,6 +8,8 @@ public class MongoRepository<T> : IRepository<T>
 
     public MongoRepository(MongoDbContext context, string collectionName)
     {
+        Console.WriteLine($"Initializing MongoRepository for collection: {collectionName}");
+        Console.WriteLine($"Context type: {context.GetType().FullName}");
         _collection = context
             .GetType()
             .GetProperty(collectionName)

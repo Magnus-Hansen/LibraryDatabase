@@ -13,7 +13,7 @@ public class MongoDbContext
     public IMongoCollection<ItemMongo> Items =>
         _database.GetCollection<ItemMongo>("Items");
 
-    public IMongoCollection<InventoryMongo> Inventories =>
+    public IMongoCollection<InventoryMongo> Inventory =>
         _database.GetCollection<InventoryMongo>("Inventory");
 
     public IMongoCollection<LoanersMongo> Loaners =>
