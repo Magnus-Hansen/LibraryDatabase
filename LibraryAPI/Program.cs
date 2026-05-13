@@ -1,5 +1,6 @@
 using LibraryAPI.Services;
 using LibraryAPI.Services.Interfaces;
+using LibraryAPI.Services.Graph;
 using LibrarySQLBackend.Models;
 using LibrarySQLBackend.Repositories;
 using LibrarySQLBackend.Repositories.Interfaces;
@@ -13,6 +14,7 @@ using Neo4j.Driver;
 using graphBackend.Repositories;
 using LibrarySQLBackend.Context;
 using graphBackend.Repositories.Interfaces;
+using LibraryAPI.Services.Graph.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +45,10 @@ builder.Services.AddScoped<IPasswordHasher<Loaner>, PasswordHasher<Loaner>>();
 
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 builder.Services.AddScoped<ILoanService, LoanService>();
+
+builder.Services.AddScoped<ILoanServiceGraph, LoanServiceGraph>();
+builder.Services.AddScoped<ILoanerServiceGraph, LoanerServiceGraph>();
+builder.Services.AddScoped<IItemServiceGraph, ItemServiceGraph>();
 
 builder.Services.AddScoped<ILoanRepositoryGraph, LoanRepositoryGraph>();
 builder.Services.AddScoped<ILoanerRepositoryGraph, LoanerRepositoryGraph>();

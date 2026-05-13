@@ -7,12 +7,11 @@ namespace LibraryAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
     public class LoansControllerGraph : ControllerBase
     {
-        private readonly ILoanService _loanService;
+        private readonly ILoanServiceGraph _loanService;
 
-        public LoansControllerGraph(ILoanService loanService)
+        public LoansControllerGraph(ILoanServiceGraph loanService)
         {
             _loanService = loanService;
         }
