@@ -25,10 +25,11 @@ namespace graphBackend.Services
             return await session.ExecuteWriteAsync(async tx =>
             {
                 var result = await tx.RunAsync(@"
-                MATCH (c:Counter {name: $name})
-                SET c.value = c.value + 1
-                RETURN c.value AS nextId",
-                new { name = counterName });
+                    MERGE (c:Counter {name: $name})
+                    ON CREATE SET c.value = 0
+                    SET c.value = c.value + 1
+                    RETURN c.value AS nextId",
+                    new { name = counterName });
 
                 var record = await result.SingleAsync();
                 return record["nextId"].As<int>();

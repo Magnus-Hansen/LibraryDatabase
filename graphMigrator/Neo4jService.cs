@@ -149,7 +149,7 @@ namespace graphMigrator
                 "Fine",
                 @"UNWIND $objects AS f
                 MERGE (fi:Fine {id: f.Id})
-                SET fi.amount = f.Amount, fi.status = f.Status, fi.created_date = f.Created_date, fi.paid_date = f.Paid_date, fi.due_date = f.Due_date"
+                SET fi.amount = f.Amount, fi.status = f.Status, fi.created_date = f.Created_date, fi.paid_date = f.Paid_date, fi.due_date = f.Due_date, fi.loan_id = f.Loan_id"
             },
             {
                 "Boardgame",
@@ -377,6 +377,37 @@ namespace graphMigrator
                 "Book_ISBN",
                 "CREATE TEXT INDEX textIndex_book_ISBN FOR (n:Book) ON (n.ISBN)"
             }
+        };
+        public Dictionary<string, string> NodeId = new Dictionary<string, string>
+        {
+            {
+                "Loaner", 
+                "MATCH (n:Loaner) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Loaner'}) SET c.value = maxId"
+            },
+            {
+                "Loan",
+                "MATCH (n:Loan) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Loan'}) SET c.value = maxId"
+            },
+            {
+                "Item",
+                "MATCH (n:Item) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Item'}) SET c.value = maxId"
+            },
+            {
+                "Inventory",
+                "MATCH (n:Inventory) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Inventory'}) SET c.value = maxId"
+            },
+            {
+                "Fine",
+                "MATCH (n:Fine) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Fine'}) SET c.value = maxId"
+            },
+            {
+                "Book",
+                "MATCH (n:Book) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Book'}) SET c.value = maxId"
+            },
+            {
+                "Boardgame",
+                "MATCH (n:Boardgame) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Boardgame'}) SET c.value = maxId"
+            },
         };
     }
 }

@@ -11,6 +11,7 @@ internal class Program
         var neo4jQueries = neo4j.nodeQueries;
         var neo4jConstraints = neo4j.Constraint;
         var neo4jIndexes = neo4j.Indexes;
+        var NodeId = neo4j.NodeId;
 
         await neo4j.ExecuteInTransaction(async transaction =>
         {
@@ -57,6 +58,11 @@ internal class Program
             await neo4j.Neo4jExecute(transaction, mysql.GetLoans(), neo4jQueries["Loaner_Loan"]);
             await neo4j.Neo4jExecute(transaction, mysql.GetFines(), neo4jQueries["Fine_Loan"]);
             await neo4j.Neo4jExecute(transaction, mysql.GetLoans(), neo4jQueries["Loan_Inventory"]);
+
+            foreach (var nodeId in NodeId.Values)
+            {
+                await neo4j.Neo4jExecute(transaction, nodeId);
+            }
 
             Console.WriteLine("Completed migration");
         });
