@@ -48,6 +48,15 @@ namespace graphMigrator
 
         public IMongoDatabase Database => _database;
 
+        public async Task EnsureConstraintsAsync()
+        {
+            await EnsureCollectionExistsAsync("Items");
+            await EnsureCollectionExistsAsync("Inventories");
+            await EnsureCollectionExistsAsync("Loaners");
+            await EnsureCollectionExistsAsync("Loans");
+            await EnsureCollectionExistsAsync("Reservations");
+            await CreateIndexes();
+        }
         // MySQL Models
         List<BoardGame> boardgameDetails;
         List<Book> books;
@@ -66,6 +75,18 @@ namespace graphMigrator
         List<Reservation> reservations;
         List<Review> reviews;
         List<Tag> tags;
+
+        private async Task EnsureCollectionExistsAsync(string collectionName)
+        {
+            var filter = new BsonDocument("name", collectionName);
+            var collections = await _database.ListCollectionNamesAsync(new ListCollectionNamesOptions { Filter = filter });
+            var exists = await collections.AnyAsync();
+            if (exists)
+                return;
+
+            await _database.CreateCollectionAsync(collectionName);
+        }
+
 
         private void FetchData()
         {
@@ -264,6 +285,8 @@ namespace graphMigrator
         // Transforms Inventory from MySQL to MongoDB format
         public List<InventoryMongo> TransformInventory()
         {
+            List<Inventory> inventories = mysqlService.GetInventories();
+            var itemsById = mysqlService.GetItems().ToDictionary(i => i.Id, i => i.Name ?? "");
             List<InventoryMongo> inventoryMongos = new List<InventoryMongo>();
             foreach (Inventory inventory in inventories)
             {
@@ -272,6 +295,7 @@ namespace graphMigrator
                     _id = ObjectId.GenerateNewId(),
                     Id = inventory.Id, // This is the Id from the SQL database, not the MongoDB _id
                     Item_Id = inventory.Item_id,
+                    Item_Name = itemsById.TryGetValue(inventory.Item_id, out var name) ? name : "",
                     Barcode = inventory.Barcode,
                     Status = inventory.Status,
                     Placement = inventory.Placement ?? ""
@@ -441,12 +465,79 @@ namespace graphMigrator
             try
             {
                 var collection = _database.GetCollection<T>(collectionName);
-                collection.InsertMany(data);
+                await collection.InsertManyAsync(data);
                 Console.WriteLine($"Data inserted into MongoDB collection '{collectionName}' successfully!");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to insert data into MongoDB: {ex.Message}");
+            }
+        }
+
+        // Create a lean index set aligned with the core SQL query patterns.
+        public async Task CreateIndexes()
+        {
+            try
+            {
+                var items = _database.GetCollection<ItemMongo>("Items");
+                await items.Indexes.DropAllAsync();
+                await items.Indexes.CreateManyAsync(new[]
+                {
+                    new CreateIndexModel<ItemMongo>(Builders<ItemMongo>.IndexKeys.Ascending(x => x.Name)),
+                    new CreateIndexModel<ItemMongo>(Builders<ItemMongo>.IndexKeys.Ascending(x => x.MediaType)),
+                    new CreateIndexModel<ItemMongo>(
+                        Builders<ItemMongo>.IndexKeys.Ascending("BookDetails.ISBN"),
+                        new CreateIndexOptions
+                        {
+                            Unique = true,
+                            Sparse = true
+                        })
+                });
+
+                var loaners = _database.GetCollection<LoanersMongo>("Loaners");
+                await loaners.Indexes.DropAllAsync();
+                await loaners.Indexes.CreateManyAsync(new[]
+                {
+                    new CreateIndexModel<LoanersMongo>(
+                        Builders<LoanersMongo>.IndexKeys.Ascending(x => x.Email),
+                        new CreateIndexOptions { Unique = true }),
+                    new CreateIndexModel<LoanersMongo>(
+                        Builders<LoanersMongo>.IndexKeys.Ascending(x => x.Cpr),
+                        new CreateIndexOptions { Unique = true })
+                });
+
+                var inventories = _database.GetCollection<InventoryMongo>("Inventories");
+                await inventories.Indexes.DropAllAsync();
+                await inventories.Indexes.CreateManyAsync(new[]
+                {
+                    new CreateIndexModel<InventoryMongo>(
+                        Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Barcode),
+                        new CreateIndexOptions { Unique = true }),
+                    new CreateIndexModel<InventoryMongo>(
+                        Builders<InventoryMongo>.IndexKeys.Combine(
+                            Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Item_Id),
+                            Builders<InventoryMongo>.IndexKeys.Ascending(x => x.Status)))
+                });
+
+                var loans = _database.GetCollection<LoansMongo>("Loans");
+                await loans.Indexes.DropAllAsync();
+                await loans.Indexes.CreateManyAsync(new[]
+                {
+                    new CreateIndexModel<LoansMongo>(
+                        Builders<LoansMongo>.IndexKeys.Combine(
+                            Builders<LoansMongo>.IndexKeys.Ascending(x => x.Loaner_Id),
+                            Builders<LoansMongo>.IndexKeys.Ascending(x => x.Status)))
+                });
+
+                // No custom reservation indexes in the lean profile.
+                var reservations = _database.GetCollection<ReservationsMongo>("Reservations");
+                await reservations.Indexes.DropAllAsync();
+
+                Console.WriteLine("MongoDB indexes created successfully!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to create MongoDB indexes: {ex.Message}");
             }
         }
     }

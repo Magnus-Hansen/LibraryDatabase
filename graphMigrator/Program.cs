@@ -1,7 +1,4 @@
 ﻿using graphMigrator;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Graph;
-using Microsoft.Graph.Models;
 using Secret = graphMigrator.Secret;
 
 
@@ -15,6 +12,10 @@ internal class Program
 
         // MongoDB Migration
         var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
+
+        // Ensure collections exist + create indexes (unique constraints)
+        await mongoDB.EnsureConstraintsAsync();
+
         await mongoDB.ClearCollection("Items");
         await mongoDB.InsertData("Items", mongoDB.TransformItems());
         await mongoDB.ClearCollection("Inventory");
@@ -26,6 +27,5 @@ internal class Program
         await mongoDB.ClearCollection("Reservations");
         await mongoDB.InsertData("Reservations", mongoDB.TransformReservations());
 
-        await mongoDB.ClearCollection("Inventories");
     }
 }
