@@ -1,4 +1,6 @@
-﻿using LibrarySQLBackend.Models;
+﻿using LibraryAPI.DTOs;
+using LibraryAPI.Services;
+using LibrarySQLBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAPI.Controllers;
@@ -7,43 +9,31 @@ namespace LibraryAPI.Controllers;
 [ApiController]
 public class MongoLoansController : ControllerBase
 {
-    private readonly MongoRepository<LoansMongo> _repository;
+    private readonly MongoLoanService loanService;
 
     public MongoLoansController(MongoDbContext context)
     {
-        _repository = new MongoRepository<LoansMongo>(context, "Loans");
+       loanService= new MongoLoanService(context);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _repository.GetAllAsync());
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var loan = await _repository.GetByIdAsync(id);
-
-        if (loan == null)
-            return NotFound();
-
-        return Ok(loan);
+        return Ok(loanService.GetAllAsync());
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(LoansMongo loan)
+    public async Task<IActionResult> Create(CreateLoanDto loan)
     {
-        var created = await _repository.CreateAsync(loan);
+        var created = await loanService.CreateAsync(loan);
         return Ok(created);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, LoansMongo loan)
+    public async Task<IActionResult> Update(int id, LoanDto loan)
     {
-        var existing = await _repository.GetByIdAsync(id);
-        loan._id = existing._id; // Preserve the MongoDB ObjectId for the update
-        var updated = await _repository.UpdateAsync(id, loan);
+        var existing = await loanService.GetByIdAsync(id);
+        var updated = await loanService.UpdateAsync(loan, id);
 
         if (!updated)
             return NotFound();
@@ -54,7 +44,7 @@ public class MongoLoansController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await _repository.DeleteAsync(id);
+        var deleted = await loanService.DeleteAsync(id);
 
         if (!deleted)
             return NotFound();

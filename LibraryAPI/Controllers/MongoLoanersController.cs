@@ -1,4 +1,6 @@
-﻿using LibrarySQLBackend.Models;
+﻿using LibraryAPI.DTOs;
+using LibraryAPI.Services;
+using LibrarySQLBackend.Models;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -8,17 +10,17 @@ namespace LibraryAPI.Controllers;
     [ApiController]
     public class MongoLoanersController : ControllerBase
     {
-        private readonly MongoRepository<LoanersMongo> _repository;
+    private readonly MongoLoanerService loanerService;
 
         public MongoLoanersController(MongoDbContext context)
         {
-            _repository = new MongoRepository<LoanersMongo>(context, "Loaners");
+            loanerService = new MongoLoanerService(context);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            return Ok(await _repository.GetAllAsync());
+            return Ok(await loanerService.GetAllAsync());
         }
 
         
@@ -26,7 +28,7 @@ namespace LibraryAPI.Controllers;
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var loaner = await _repository.GetByIdAsync(id);
+            var loaner = await loanerService.GetByIdAsync(id);
 
             if (loaner == null)
                 return NotFound();
@@ -36,29 +38,26 @@ namespace LibraryAPI.Controllers;
         
 
         [HttpPost]
-        public async Task<IActionResult> Create(LoanersMongo loaner)
+        public async Task<IActionResult> Create(RegisterLoanerDto loaner)
         {
-            var created = await _repository.CreateAsync(loaner);
+            var created = await loanerService.CreateAsync(loaner);
             return Ok(created);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, LoanersMongo loaner)
+        public async Task<IActionResult> Update(int id, LoanerDto loaner)
         {
-        var existing = await _repository.GetByIdAsync(id);
-        loaner._id = existing._id; // Preserve the MongoDB ObjectId for the update
-        var updated = await _repository.UpdateAsync(id, loaner);
+        var existing = await loanerService.GetByIdAsync(id);
+        if (existing == null)
+            return NotFound();
 
-            if (!updated)
-                return NotFound();
-
-            return NoContent();
+            return Ok();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _repository.DeleteAsync(id);
+            var deleted = await loanerService.DeleteAsync(id);
 
             if (!deleted)
                 return NotFound();

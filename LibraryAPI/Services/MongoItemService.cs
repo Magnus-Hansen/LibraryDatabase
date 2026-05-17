@@ -1,118 +1,119 @@
 ﻿using LibraryAPI.DTOs;
 using LibraryAPI.Services.Interfaces;
+using LibraryMongoDBBackend.Repositories.Interfaces;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace LibraryAPI.Services
 {
-    public class MongoItemService : IMongoService
+    public class MongoItemService : IMongoService<ItemMongo, ItemDto, CreateItemDto, UpdateItemDto>
     {
-        private readonly IMongoCollection<ItemMongo> _items;
+        private readonly MongoRepository<ItemMongo> _repository;
 
-        public MongoItemService(IMongoDatabase database)
+        public MongoItemService(MongoDbContext context)
         {
-            _items = database.GetCollection<ItemMongo>("Items");
+            _repository = new MongoRepository<ItemMongo>(context, "Items");
         }
 
-        // -----------------------------
-        // CREATE
-        // -----------------------------
-        public async Task<ItemDto> CreateAsync(ItemMongo item)
-        {
-            await _items.InsertOneAsync(item);
-
-            return MapToItemDto(item);
-        }
-
-        // -----------------------------
-        // GET ALL
-        // -----------------------------
         public async Task<List<ItemDto>> GetAllAsync()
         {
-            var items = await _items
-                .Find(_ => true)
-                .ToListAsync();
-
-            return items.Select(MapToItemDto).ToList();
+            var loans = await _repository.GetAllAsync();
+            return loans.Select(MapToDto).ToList();
         }
 
-        // -----------------------------
-        // GET BY ID
-        // -----------------------------
-        public async Task<ItemDetailsDto?> GetByIdAsync(int id)
+        public async Task<ItemDto> CreateAsync(CreateItemDto dto)
         {
-            var item = await _items
-                .Find(x => x.Id == id)
-                .FirstOrDefaultAsync();
+            var itemCreation = await _repository.CreateAsync(new ItemMongo
+            {
+                _id = ObjectId.GenerateNewId(),
+                Id = (await GetAllAsync()).Count+1,
+                Name = dto.Name,
+                MediaType = dto.MediaType,
+                ReleaseYear = dto.ReleaseYear,
+                Description = dto.Description,
+                Reviews = new List<ReviewMongo>(), // start with empty list of reviews
+                ReviewSummary = "", // start with empty review summary
+                Image = dto.Image,
+                Language = new LanguageMongo { Id = dto.LanguageId ?? 0 }, // only set the ID, other fields will be populated when fetching
+                Publisher = new PublisherMongo { Id = dto.PublisherId ?? 0 }, // only set the ID, other fields will be populated when fetching
+                Creators = dto.CreatorIds.Select(id => new CreatorMongo { Id = id }).ToList(), // only set the IDs, other fields will be populated when fetching
+                Genres = dto.GenreIds.Select(id => new GenreMongo { Id = id }).ToList(), // only set the IDs, other fields will be populated when fetching
+                Tags = dto.TagIds.Select(id => new TagMongo { Id = id }).ToList(), // only set the IDs, other fields will be populated when fetching
+                BookDetails = dto.MediaType == "book" ? new BookDetailsMongo
+                {
+                    ISBN = dto.Book.Isbn,
+                    No_Of_Pages = dto.Book?.NoOfPages,
+                    Version = dto.Book?.Version
+                } : null, // only set book details if media type is book
 
-            if (item == null)
-                return null;
+                BoardgameDetails = dto.MediaType == "boardgame" ? new BoardgameDetailsMongo
+                {
+                    Age_Group = dto.Boardgame?.AgeGroup,
+                    No_Of_Players = dto.Boardgame?.NoOfPlayers,
+                    Play_Time = dto.Boardgame?.PlayTime
+                } : null, // only set boardgame details if media type is boardgame
 
-            return MapToItemDetailsDto(item);
+                AverageStars = 0 // start with average stars of 0 since there are no reviews yet
+            });
+            return MapToDto(itemCreation);
         }
 
-        // -----------------------------
-        // GET BY NAME
-        // -----------------------------
-        public async Task<List<ItemDto>> GetByNameAsync(string name)
+        public async Task<bool> UpdateAsync(UpdateItemDto dto, int id)
         {
-            var filter = Builders<ItemMongo>.Filter.Regex(
-                x => x.Name,
-                new MongoDB.Bson.BsonRegularExpression(name, "i")
-            );
-
-            var items = await _items
-                .Find(filter)
-                .ToListAsync();
-
-            return items.Select(MapToItemDto).ToList();
+            if(await GetByIdAsync(id) != null)
+            {
+                await _repository.UpdateAsync(id, new ItemMongo
+                {
+                    Name = dto.Name,
+                    ReleaseYear = dto.ReleaseYear,
+                    MediaType = dto.MediaType,
+                    Description = dto.Description,
+                    Image = dto.Image,
+                    Language = new LanguageMongo { Id = dto.LanguageId ?? 0 },
+                    Publisher = new PublisherMongo { Id = dto.PublisherId ?? 0 },
+                    Creators = dto.CreatorIds.Select(id => new CreatorMongo { Id = id }).ToList(),
+                    Genres = dto.GenreIds.Select(id => new GenreMongo { Id = id }).ToList(),
+                    Tags = dto.TagIds.Select(id => new TagMongo { Id = id }).ToList(),
+                    BookDetails = dto.MediaType == "book" ? new BookDetailsMongo
+                    {
+                        ISBN = dto.Book.Isbn,
+                        No_Of_Pages = dto.Book?.NoOfPages,
+                        Version = dto.Book?.Version
+                    } : null,
+                    BoardgameDetails = dto.MediaType == "boardgame" ? new BoardgameDetailsMongo
+                    {
+                        Age_Group = dto.Boardgame?.AgeGroup,
+                        No_Of_Players = dto.Boardgame?.NoOfPlayers,
+                        Play_Time = dto.Boardgame?.PlayTime
+                    } : null,
+                });
+                return true;
+            } return false;
         }
-
-        // -----------------------------
-        // FILTER BY MEDIA TYPE
-        // -----------------------------
-        public async Task<List<ItemDto>> GetByMediaTypeAsync(string mediaType)
+        public async Task<ItemDto> GetByIdAsync(int id)
         {
-            var items = await _items
-                .Find(x => x.MediaType.ToLower() == mediaType.ToLower())
-                .ToListAsync();
-
-            return items.Select(MapToItemDto).ToList();
+            var item = await _repository.GetByIdAsync(id);
+            return MapToDto(item);
         }
-
-        // -----------------------------
-        // UPDATE
-        // -----------------------------
-        public async Task<bool> UpdateAsync(int id, ItemMongo updatedItem)
-        {
-            updatedItem._id = ObjectId.Empty;
-
-            var result = await _items.ReplaceOneAsync(
-                x => x.Id == id,
-                updatedItem
-            );
-
-            return result.ModifiedCount > 0;
-        }
-
-        // -----------------------------
-        // DELETE
-        // -----------------------------
         public async Task<bool> DeleteAsync(int id)
         {
-            var result = await _items.DeleteOneAsync(x => x.Id == id);
-
-            return result.DeletedCount > 0;
+            try {  return await _repository.DeleteAsync(id);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it as needed
+                throw new Exception($"Error deleting item with ID {id}: {ex.Message}", ex);
+            }
         }
 
         // -----------------------------
         // DTO MAPPER
         // -----------------------------
-        private static ItemDto MapToItemDto(ItemMongo item)
+        public ItemDto MapToDto(ItemMongo item)
         {
             return new ItemDto
             {
-                Id = item.Id,
+                Id = item.Id ?? 0,
                 Name = item.Name,
                 ReleaseYear = item.ReleaseYear,
                 MediaType = item.MediaType,
@@ -124,7 +125,7 @@ namespace LibraryAPI.Services
         {
             var itemDto = new ItemDetailsDto
             {
-                Id = item.Id,
+                Id = item.Id ?? 0,
                 Name = item.Name,
                 ReleaseYear = item.ReleaseYear,
                 Description = item.Description,

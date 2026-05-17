@@ -1,15 +1,16 @@
-﻿using MongoDB.Bson;
+﻿using LibraryMongoDBBackend.MongoDesign_Models.Interface;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-public class ItemMongo
+public class ItemMongo : IMongoModel
 {
     [BsonId]
     public ObjectId _id { get; set; }
-    public int Id { get; set; }
+    public int? Id { get; set; }
     public string Name { get; set; }
     public string MediaType { get; set; } // "book" | "boardgame"
 
-    public int ReleaseYear { get; set; }
+    public int? ReleaseYear { get; set; }
     public string Description { get; set; }
     public string ReviewSummary { get; set; }
     public string Image { get; set; }

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using LibraryAPI.DTOs;
+using LibraryAPI.Services;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace LibraryAPI.Controllers;
@@ -7,23 +9,23 @@ namespace LibraryAPI.Controllers;
 [ApiController]
 public class MongoItemsController : ControllerBase
 {
-    private readonly MongoRepository<ItemMongo> _repository;
+    private readonly MongoItemService itemService;
 
     public MongoItemsController(MongoDbContext context)
     {
-        _repository = new MongoRepository<ItemMongo>(context, "Items");
+        itemService = new MongoItemService(context);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _repository.GetAllAsync());
+        return Ok(await itemService.GetAllAsync());
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var item = await _repository.GetByIdAsync(id);
+        var item = await itemService.GetByIdAsync(id);
 
         if (item == null)
             return NotFound();
@@ -32,18 +34,17 @@ public class MongoItemsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(ItemMongo item)
+    public async Task<IActionResult> Create(CreateItemDto item)
     {
-        var created = await _repository.CreateAsync(item);
+        var created = await itemService.CreateAsync(item);
         return Ok(created);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, ItemMongo item)
+    public async Task<IActionResult> Update(int id, UpdateItemDto item)
     {
-        var existingItem = await _repository.GetByIdAsync(id);
-        item._id = existingItem._id; // Preserve the MongoDB ObjectId
-        var updated = await _repository.UpdateAsync(id, item);
+        var existingItem = await itemService.GetByIdAsync(id);
+        var updated = await itemService.UpdateAsync(item, id);
 
         if (!updated)
             return NotFound();
@@ -54,7 +55,7 @@ public class MongoItemsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var deleted = await _repository.DeleteAsync(id);
+        var deleted = await itemService.DeleteAsync(id);
 
         if (!deleted)
             return NotFound();
