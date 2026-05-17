@@ -13,8 +13,10 @@ internal class Program
         // MongoDB Migration
         var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
 
+        await mongoDB.EnsureUsersAndPrivilegesAsync();
+
         // Ensure collections exist + create indexes (unique constraints)
-        await mongoDB.EnsureConstraintsAsync();
+        //await mongoDB.EnsureConstraintsAsync();
 
         await mongoDB.ClearCollection("Items");
         await mongoDB.InsertData("Items", mongoDB.TransformItems());

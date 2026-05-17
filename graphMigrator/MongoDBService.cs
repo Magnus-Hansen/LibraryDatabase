@@ -57,6 +57,64 @@ namespace graphMigrator
             await EnsureCollectionExistsAsync("Reservations");
             await CreateIndexes();
         }
+
+
+        // Creates MongoDB users and assigns roles/privileges
+        public async Task EnsureUsersAndPrivilegesAsync()
+        {
+            var adminDb = _client.GetDatabase("admin");
+
+            await CreateUserIfNotExists(adminDb, "app_user", "app123", new BsonArray
+    {
+        new BsonDocument { { "role", "readWrite" }, { "db", _databaseName } }
+    });
+
+            await CreateUserIfNotExists(adminDb, "read_only", "read123", new BsonArray
+    {
+        new BsonDocument { { "role", "read" }, { "db", _databaseName } }
+    });
+
+            await CreateUserIfNotExists(adminDb, "backup_admin", "backup123", new BsonArray
+    {
+        new BsonDocument { { "role", "backup" }, { "db", "admin" } },
+        new BsonDocument { { "role", "restore" }, { "db", "admin" } },
+        new BsonDocument { { "role", "read" }, { "db", _databaseName } }
+    });
+        }
+
+        private async Task CreateUserIfNotExists(
+            IMongoDatabase adminDb,
+            string username,
+            string password,
+            BsonArray roles)
+        {
+            var users = await adminDb.RunCommandAsync<BsonDocument>(
+                new BsonDocument
+                {
+            { "usersInfo", username },
+            { "showPrivileges", true }
+                });
+
+            var existingUsers = users["users"].AsBsonArray;
+
+            if (existingUsers.Any())
+            {
+                Console.WriteLine($"MongoDB user '{username}' already exists.");
+                return;
+            }
+
+            var command = new BsonDocument
+    {
+        { "createUser", username },
+        { "pwd", password },
+        { "roles", roles }
+    };
+
+            await adminDb.RunCommandAsync<BsonDocument>(command);
+            Console.WriteLine($"MongoDB user '{username}' created.");
+        }
+
+
         // MySQL Models
         List<BoardGame> boardgameDetails;
         List<Book> books;
