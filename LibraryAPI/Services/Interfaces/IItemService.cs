@@ -10,5 +10,6 @@ namespace LibraryAPI.Services.Interfaces
         Task<ItemDetailsDto> AddAsync(CreateItemDto itemDto);
         Task<bool> UpdateAsync(int id, UpdateItemDto dto);
         Task<bool> DeleteAsync(int id);
+        Task<ReviewSummaryResultDto?> GenerateReviewSummaryAsync(int id);
     }
 }

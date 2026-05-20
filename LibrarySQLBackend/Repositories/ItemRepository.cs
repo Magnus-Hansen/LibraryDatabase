@@ -102,5 +102,21 @@ namespace LibrarySQLBackend.Repositories
         {
             _context.Boardgames.Remove(boardgame);
         }
+
+        public async Task<bool> UpdateReviewSummaryAsync(int itemId, string summary)
+        {
+            var item = await _context.Items.FindAsync(itemId);
+
+            if (item == null)
+            {
+                return false;
+            }
+
+            item.ReviewSummary = summary;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

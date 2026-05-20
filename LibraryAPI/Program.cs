@@ -30,6 +30,26 @@ builder.Services.AddScoped<IPasswordHasher<Loaner>, PasswordHasher<Loaner>>();
 builder.Services.AddScoped<ILoanRepository, LoanRepository>();
 builder.Services.AddScoped<ILoanService, LoanService>();
 
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+
+// AI service
+var aiEnabled = builder.Configuration.GetValue<bool>("Ai:Enabled");
+
+if (aiEnabled)
+{
+    builder.Services.AddHttpClient<IAiSummaryService, OllamaAiSummaryService>((serviceProvider, client) =>
+    {
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        var baseUrl = configuration["Ai:BaseUrl"] ?? "http://localhost:11434";
+
+        client.BaseAddress = new Uri(baseUrl);
+    });
+}
+else
+{
+    builder.Services.AddScoped<IAiSummaryService, DisabledAiSummaryService>();
+}
+
 // JWT settings
 var jwtKey = builder.Configuration["Jwt:Key"]
              ?? throw new InvalidOperationException("Missing Jwt:Key");

@@ -8,10 +8,14 @@ namespace LibraryAPI.Services
     public class ItemService : IItemService
     {
         private readonly IItemRepository _itemRepository;
+        private readonly IReviewRepository _reviewRepository;
+        private readonly IAiSummaryService _aiSummaryService;
 
-        public ItemService(IItemRepository itemRepository)
+        public ItemService(IItemRepository itemRepository, IReviewRepository reviewRepository, IAiSummaryService aiSummaryService)
         {
             _itemRepository = itemRepository;
+            _reviewRepository = reviewRepository;
+            _aiSummaryService = aiSummaryService;
         }
 
         
@@ -208,6 +212,45 @@ namespace LibraryAPI.Services
         public async Task<bool> DeleteAsync(int id)
         {
             return await _itemRepository.DeleteAsync(id);
+        }
+
+        public async Task<ReviewSummaryResultDto?> GenerateReviewSummaryAsync(int id)
+        {
+            var item = await _itemRepository.GetByIdAsync(id);
+
+            if (item == null)
+            {
+                return null;
+            }
+
+            var reviews = await _reviewRepository.GetReviewTextsByItemIdAsync(id);
+
+            if (!reviews.Any())
+            {
+                throw new InvalidOperationException("Cannot generate a review summary because this item has no review text.");
+            }
+
+            var summary = await _aiSummaryService.GenerateReviewSummaryAsync(
+                item.Name ?? "Unknown item",
+                reviews);
+
+            if (string.IsNullOrWhiteSpace(summary))
+            {
+                throw new InvalidOperationException("The AI service returned an empty summary.");
+            }
+
+            var updated = await _itemRepository.UpdateReviewSummaryAsync(id, summary);
+
+            if (!updated)
+            {
+                return null;
+            }
+
+            return new ReviewSummaryResultDto
+            {
+                Title = item.Name,
+                ReviewSummary = summary
+            };
         }
 
 

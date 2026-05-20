@@ -8,7 +8,7 @@ namespace LibraryAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class ItemsController : ControllerBase
     {
         private readonly IItemService _itemService;
@@ -68,5 +68,34 @@ namespace LibraryAPI.Controllers
 
             return NoContent();
         }
+
+        [HttpPost("{id}/generate-review-summary")]
+        public async Task<IActionResult> GenerateReviewSummaryAsync(int id)
+        {
+            try
+            {
+                var item = await _itemService.GenerateReviewSummaryAsync(id);
+
+                if (item == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(item);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (HttpRequestException)
+            {
+                return StatusCode(503, new
+                {
+                    message = "The AI service is currently unavailable. Make sure Ollama is running."
+                });
+            }
+        }
+
+
     }
 }

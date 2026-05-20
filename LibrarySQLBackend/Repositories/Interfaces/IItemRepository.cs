@@ -14,6 +14,7 @@ namespace LibrarySQLBackend.Repositories.Interfaces
         Task<Item> AddAsync(Item item);
         Task<bool> UpdateAsync(Item item);
         Task<bool> DeleteAsync(int id);
+        Task<bool> UpdateReviewSummaryAsync(int itemId, string summary);
 
         Task<List<Creator>> GetCreatorsByIdsAsync(List<int> ids);
         Task<List<Genre>> GetGenresByIdsAsync(List<int> ids);
