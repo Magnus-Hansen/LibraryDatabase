@@ -58,12 +58,20 @@ namespace LibraryAPI.Services
             return MapToDto(itemCreation);
         }
 
+        private async Task<string> GetMongoId(int id)
+        {
+            ItemMongo item = await _repository.GetByIdAsync(id);
+            return item?._id.ToString();
+        }
+
         public async Task<bool> UpdateAsync(UpdateItemDto dto, int id)
         {
             if(await GetByIdAsync(id) != null)
             {
                 await _repository.UpdateAsync(id, new ItemMongo
                 {
+                    _id = ObjectId.Parse(await GetMongoId(id)),
+                    Id = id,
                     Name = dto.Name,
                     ReleaseYear = dto.ReleaseYear,
                     MediaType = dto.MediaType,

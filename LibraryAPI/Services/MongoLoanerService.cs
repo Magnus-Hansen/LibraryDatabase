@@ -1,5 +1,6 @@
 ﻿using LibraryAPI.DTOs;
 using LibraryAPI.Services.Interfaces;
+using MongoDB.Bson;
 
 namespace LibraryAPI.Services
 {
@@ -58,17 +59,24 @@ namespace LibraryAPI.Services
         
         }
 
+        private async Task<string> GetMongoId(int id)
+        {
+            LoanersMongo loan = await _repository.GetByIdAsync(id);
+            return loan?._id.ToString();
+        }
         public async Task<bool> UpdateAsync(LoanerDto dto, int id)
         {
             if (await GetByIdAsync(id) != null)
             {
                 await _repository.UpdateAsync(id, new LoanersMongo
                 {
+                    _id = ObjectId.Parse(await GetMongoId(id)),
+                    Id = id,
                     FirstName = dto.FirstName,
                     LastName = dto.LastName,
                     Cpr = dto.Cpr,
                     Tlf = dto.Tlf,
-                    Email = dto.Email 
+                    Email = dto.Email
                 });
                 return true;
             }

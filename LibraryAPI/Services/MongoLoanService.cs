@@ -61,12 +61,20 @@ namespace LibraryAPI.Services
             var loan = await _repository.GetByIdAsync(id);
             return MapToDto(loan);
         }
+
+        private async Task<string> GetMongoId(int id)
+        {
+            LoansMongo loan = await _repository.GetByIdAsync(id);
+            return loan?._id.ToString();
+        }
+
         public async Task<bool> UpdateAsync(LoanDto loanDto, int id)
         {
             if(await GetByIdAsync(id) != null)
             {
                 await _repository.UpdateAsync(id, new LoansMongo
                 {
+                    _id = ObjectId.Parse(await GetMongoId(id)),
                     Id = loanDto.Id,
                     Loan_Date = loanDto.LoanDate,
                     Due_Date = loanDto.DueDate,

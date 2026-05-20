@@ -49,6 +49,4 @@ public class MongoRepository<T> : IRepository<T>
 
         return result.DeletedCount > 0;
     }
-
-
 }
