@@ -1,4 +1,5 @@
 ﻿using graphMigrator.Models;
+using Microsoft.Graph.Models.CallRecords;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
@@ -44,6 +45,11 @@ namespace graphMigrator
             {
                 return $"Failed to connect to MongoDB: {ex.Message}";
             }
+        }
+
+        public IClientSessionHandle StartSession()
+        {
+            return _client.StartSession();
         }
 
         public IMongoDatabase Database => _database;
@@ -166,9 +172,9 @@ namespace graphMigrator
             reviews = mysqlService.GetReviews();
             tags = mysqlService.GetTags();
         }
-
+        
         // Transform data to MongoDB models
-        public bool TransformData()
+        public async Task<bool> TransformData()
         {
             try
             {
@@ -178,6 +184,7 @@ namespace graphMigrator
                 List<LoansMongo> loans = TransformLoans();
                 List<ReservationsMongo> reservations = TransformReservations();
                 Console.WriteLine("Succesfully transformed all data");
+                
                 return true;
             }
             catch (Exception ex)
