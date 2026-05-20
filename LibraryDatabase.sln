@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "graphBackendTests", "graphB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryMongoDBBackend", "LibraryMongoDBBackend\LibraryMongoDBBackend.csproj", "{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTest", "IntegrationTest\IntegrationTest.csproj", "{8E05BFB8-189F-4016-B9B0-6DBF7672583A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E05BFB8-189F-4016-B9B0-6DBF7672583A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E05BFB8-189F-4016-B9B0-6DBF7672583A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E05BFB8-189F-4016-B9B0-6DBF7672583A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E05BFB8-189F-4016-B9B0-6DBF7672583A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

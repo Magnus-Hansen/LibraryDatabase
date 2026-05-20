@@ -19,4 +19,8 @@
     <ProjectReference Include="..\LibrarySQLBackend\LibrarySQLBackend.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="IntegrationTest" />
+  </ItemGroup>
+
 </Project>
