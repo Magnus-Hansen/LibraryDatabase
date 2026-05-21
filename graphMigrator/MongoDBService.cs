@@ -57,7 +57,7 @@ namespace graphMigrator
         public async Task EnsureConstraintsAsync()
         {
             await EnsureCollectionExistsAsync("Items");
-            await EnsureCollectionExistsAsync("Inventories");
+            await EnsureCollectionExistsAsync("Inventory");
             await EnsureCollectionExistsAsync("Loaners");
             await EnsureCollectionExistsAsync("Loans");
             await EnsureCollectionExistsAsync("Reservations");
@@ -571,7 +571,7 @@ namespace graphMigrator
                         new CreateIndexOptions { Unique = true })
                 });
 
-                var inventories = _database.GetCollection<InventoryMongo>("Inventories");
+                var inventories = _database.GetCollection<InventoryMongo>("Inventory");
                 await inventories.Indexes.DropAllAsync();
                 await inventories.Indexes.CreateManyAsync(new[]
                 {
