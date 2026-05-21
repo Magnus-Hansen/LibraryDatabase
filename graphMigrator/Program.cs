@@ -71,7 +71,7 @@ internal class Program
             Console.WriteLine("Completed neo4j migration");
 
             // MongoDB Migration
-            var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
+            /*var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
 
             await mongoDB.EnsureUsersAndPrivilegesAsync();
 
@@ -108,7 +108,7 @@ internal class Program
                     await session.AbortTransactionAsync();
                     return;
                 }
-            }
+            }*/
         });
     }
 }
