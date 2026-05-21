@@ -409,5 +409,25 @@ namespace graphMigrator
                 "MATCH (n:Boardgame) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Boardgame'}) SET c.value = maxId"
             },
         };
+        public Dictionary<string, string> Procedues = new Dictionary<string, string>
+        {
+            {
+                "Pay_fine",
+                @"CALL apoc.cypher.run('
+                    MATCH (f:Fine {id: $fine_id})
+                    WHERE f.status IN [""unpaid"", ""late""]
+                    SET f.status = ""paid"",
+                    RETURN f',
+                    {fine_id: $fine_id}
+                )
+                YIELD value
+                RETURN value
+                "
+            },
+            {
+                "",
+                ""
+            }
+        };
     }
 }
