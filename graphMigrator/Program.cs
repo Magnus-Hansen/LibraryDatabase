@@ -68,7 +68,9 @@ internal class Program
                 await neo4j.Neo4jExecute(transaction, nodeId);
             }
 
-            Console.WriteLine("Completed neo4j migration");
+        });
+        Console.WriteLine("Completed neo4j migration");
+            
 
             // MongoDB Migration
             var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
@@ -109,6 +111,6 @@ internal class Program
                     return;
                 }
             }
-        });
+        
     }
 }
