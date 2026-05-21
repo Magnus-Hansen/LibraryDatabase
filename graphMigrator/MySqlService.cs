@@ -70,10 +70,10 @@ namespace graphMigrator
                     Language_id = reader.GetInt32("language_id"),
                     Name = reader.GetString("name"),
                     Release_year = reader.GetInt32("release_year"),
-                    Description = reader.GetString("description"),
-                    Review_summary = reader.GetString("review_summary"),
+                    Description = reader.IsDBNull("description") ? null : reader.GetString("description"),
+                    Review_summary = reader.IsDBNull("review_summary") ? null : reader.GetString("review_summary"),
                     Media_type = reader.GetString("media_type"),
-                    Image = reader.GetString("image"),
+                    Image = reader.IsDBNull("image") ? null : reader.GetString("image"),
                     Publisher_id = reader.GetInt32("publisher_id"),
                     Average_stars = reader.GetFloat("average_stars")
                 });
