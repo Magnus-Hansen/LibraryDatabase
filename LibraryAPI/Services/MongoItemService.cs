@@ -101,6 +101,9 @@ namespace LibraryAPI.Services
         public async Task<ItemDto> GetByIdAsync(int id)
         {
             var item = await _repository.GetByIdAsync(id);
+            if(item == null)
+                return null;
+
             return MapToDto(item);
         }
         public async Task<bool> DeleteAsync(int id)

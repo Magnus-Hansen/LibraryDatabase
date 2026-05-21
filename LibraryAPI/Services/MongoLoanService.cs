@@ -26,7 +26,7 @@ namespace LibraryAPI.Services
             var loanCreation = await _repository.CreateAsync(new LoansMongo
             {
                 _id = ObjectId.GenerateNewId(),
-                //Id = 0, // This should be generated or handled by MongoDB
+                Id = (await _repository.GetAllAsync()).Count + 1, // Generate a new ID based on the count of existing loans
                 Loaner_Id = newLoan.LoanerId,
                 InventoryId = newLoan.InventoryId,
                 Loan_Date = DateTime.UtcNow,
@@ -59,6 +59,9 @@ namespace LibraryAPI.Services
         public async Task<LoanDto> GetByIdAsync(int id)
         {
             var loan = await _repository.GetByIdAsync(id);
+            if (loan == null)
+                return null;
+
             return MapToDto(loan);
         }
 
