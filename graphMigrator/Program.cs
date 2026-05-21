@@ -15,7 +15,6 @@ internal class Program
         var neo4jQueries = neo4j.nodeQueries;
         var neo4jConstraints = neo4j.Constraint;
         var neo4jIndexes = neo4j.Indexes;
-        var NodeId = neo4j.NodeId;
 
         await neo4j.ExecuteInTransaction(async transaction =>
         {
@@ -62,6 +61,10 @@ internal class Program
             await neo4j.Neo4jExecute(transaction, mysql.GetLoans(), neo4jQueries["Loaner_Loan"]);
             await neo4j.Neo4jExecute(transaction, mysql.GetFines(), neo4jQueries["Fine_Loan"]);
             await neo4j.Neo4jExecute(transaction, mysql.GetLoans(), neo4jQueries["Loan_Inventory"]);
+
+            Console.WriteLine("Completed migration");
+        });
+
         // MongoDB Migration
         var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
 
@@ -71,14 +74,15 @@ internal class Program
         await mongoDB.EnsureConstraintsAsync();
 
         using (var session = mongoDB.StartSession())
-        { 
+        {
             var transactionOptions = new TransactionOptions(
             readConcern: ReadConcern.Majority,
             writeConcern: WriteConcern.WMajority
             );
 
             session.StartTransaction(transactionOptions);
-            try {
+            try
+            {
                 await mongoDB.ClearCollection("Items");
                 await mongoDB.InsertData("Items", mongoDB.TransformItems());
                 await mongoDB.ClearCollection("Inventory");
@@ -89,14 +93,7 @@ internal class Program
                 await mongoDB.InsertData("Loans", mongoDB.TransformLoans());
                 await mongoDB.ClearCollection("Reservations");
                 await mongoDB.InsertData("Reservations", mongoDB.TransformReservations());
-            foreach (var nodeId in NodeId.Values)
-            {
-                await neo4j.Neo4jExecute(transaction, nodeId);
-            }
 
-            Console.WriteLine("Completed migration");
-        });
-    }
                 await session.CommitTransactionAsync();
                 Console.WriteLine("Migration completed successfully.");
             }
@@ -107,5 +104,5 @@ internal class Program
                 return;
             }
         }
-        }
+    }
 }

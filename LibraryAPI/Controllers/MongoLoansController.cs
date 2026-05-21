@@ -19,7 +19,18 @@ public class MongoLoansController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(loanService.GetAllAsync());
+        return Ok(await loanService.GetAllAsync());
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+
+        var loan = await loanService.GetByIdAsync(id);
+        if (loan == null)
+            return NotFound();
+        return Ok(loan);
+
     }
 
     [HttpPost]
@@ -38,7 +49,7 @@ public class MongoLoansController : ControllerBase
         if (!updated)
             return NotFound();
 
-        return NoContent();
+        return Ok(updated);
     }
 
     [HttpDelete("{id}")]

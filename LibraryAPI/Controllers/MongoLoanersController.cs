@@ -23,20 +23,17 @@ namespace LibraryAPI.Controllers;
             return Ok(await loanerService.GetAllAsync());
         }
 
-        
-        
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id)
         {
             var loaner = await loanerService.GetByIdAsync(id);
-
             if (loaner == null)
-                return NotFound();
+            return NotFound();
 
             return Ok(loaner);
         }
-        
-
         [HttpPost]
         public async Task<IActionResult> Create(RegisterLoanerDto loaner)
         {

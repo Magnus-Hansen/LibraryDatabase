@@ -55,6 +55,8 @@ namespace LibraryAPI.Services
         public async Task<LoanerDto> GetByIdAsync(int id)
         {
             var loaner = await _repository.GetByIdAsync(id);
+            if (loaner == null)
+                return null;
             return MapToDto(loaner);
         
         }

@@ -24,10 +24,18 @@ public class MongoRepository<T> : IRepository<T>
 
     public async Task<T?> GetByIdAsync(int id)
     {
-        var filter = Builders<T>.Filter.Eq("Id", id);
-        return await _collection.Find(filter).FirstOrDefaultAsync();
+        try
+        {
+            var filter = Builders<T>.Filter.Eq("Id", id);
+            return await _collection.Find(filter).FirstOrDefaultAsync();
+        }
+        catch (Exception ex)
+        {
+            // Log the exception or handle it as needed
+            Console.WriteLine($"Error retrieving entity with ID {id}: {ex.Message}");
+            return default;
+        }
     }
-
     public async Task<List<T>> GetAllAsync()
     {
         return await _collection.Find(_ => true).ToListAsync();
