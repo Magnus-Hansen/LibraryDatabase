@@ -7,16 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibrarySQLBackend", "Librar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryAPI", "LibraryAPI\LibraryAPI.csproj", "{98DA9142-7DBB-4C0C-8676-E2E2E97D37C6}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EB71B113-9660-43F6-9B8D-240DADA62E94}"
-	ProjectSection(SolutionItems) = preProject
-		LibraryMongoDBBackend\LibraryMongoDBBackend.csproj = LibraryMongoDBBackend\LibraryMongoDBBackend.csproj
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "graphMigrator", "graphMigrator\graphMigrator.csproj", "{33A09CC1-94C0-A4D5-D511-2FF88E434700}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "graphBackend", "graphBackend\graphBackend.csproj", "{B93805D7-81BF-BA52-A3F0-8F5FF6CAF6C0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTest", "IntegrationTest\IntegrationTest.csproj", "{8E05BFB8-189F-4016-B9B0-6DBF7672583A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryMongoDBBackend", "LibraryMongoDBBackend\LibraryMongoDBBackend.csproj", "{003A9A97-BC6C-AA1B-DD12-914D88BFB074}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,22 +37,14 @@ Global
 		{B93805D7-81BF-BA52-A3F0-8F5FF6CAF6C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B93805D7-81BF-BA52-A3F0-8F5FF6CAF6C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B93805D7-81BF-BA52-A3F0-8F5FF6CAF6C0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8F5776EA-B52E-4EF4-B5AA-9B62BC6571F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8F5776EA-B52E-4EF4-B5AA-9B62BC6571F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8F5776EA-B52E-4EF4-B5AA-9B62BC6571F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8F5776EA-B52E-4EF4-B5AA-9B62BC6571F1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8BF38748-356F-4D7A-8474-3D847B64B533}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8BF38748-356F-4D7A-8474-3D847B64B533}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8BF38748-356F-4D7A-8474-3D847B64B533}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8BF38748-356F-4D7A-8474-3D847B64B533}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8F2E5DC0-1F68-40F8-BDB2-9AAC88CCF12F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8E05BFB8-189F-4016-B9B0-6DBF7672583A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8E05BFB8-189F-4016-B9B0-6DBF7672583A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E05BFB8-189F-4016-B9B0-6DBF7672583A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E05BFB8-189F-4016-B9B0-6DBF7672583A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{003A9A97-BC6C-AA1B-DD12-914D88BFB074}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{003A9A97-BC6C-AA1B-DD12-914D88BFB074}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{003A9A97-BC6C-AA1B-DD12-914D88BFB074}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{003A9A97-BC6C-AA1B-DD12-914D88BFB074}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
