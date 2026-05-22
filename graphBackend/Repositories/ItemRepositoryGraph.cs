@@ -99,12 +99,11 @@ namespace graphBackend.Repositories
             int nextId = await new Services.IdGenerator(_driver, _database).GetNextId("Item");
             await session.ExecuteWriteAsync(async transaction =>
             {
-                await transaction.RunAsync("CREATE (i:Item {id: $id, avarage_stars: $avarage_stars, description: $description, " +
+                await transaction.RunAsync("CREATE (i:Item {id: $id, description: $description, " +
                     "media_type: $media_type, image: $image, name: $name, release_year: $release_year, review_summary: $review_summary})",
                 new
                 {
                     id = nextId,
-                    avarage_stars = item.AverageStars,
                     description = item.Description,
                     media_type = item.MediaType,
                     image = item.Image,
@@ -288,7 +287,6 @@ namespace graphBackend.Repositories
             return new Item
             {
                 Id = node.Properties.GetValueOrDefault("id").As<int>(),
-                AverageStars = node.Properties.GetValueOrDefault("average_stars").As<decimal>(),
                 Description = node.Properties.GetValueOrDefault("description").As<string>(),
                 MediaType = node.Properties.GetValueOrDefault("media_type").As<string>(),
                 Image = node.Properties.GetValueOrDefault("image").As<string>(),
