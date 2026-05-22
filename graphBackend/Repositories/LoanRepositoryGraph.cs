@@ -22,13 +22,13 @@ namespace graphBackend.Repositories
             if (await result.FetchAsync())
             {
                 var node = result.Current["l"].As<INode>();
-                var LoanDate = node.Properties["loan_date"].As<ZonedDateTime>();
-                var DueDate = node.Properties["due_date"].As<ZonedDateTime>();
+                var loanDate = node.Properties["loan_date"].As<LocalDateTime>();
+                var dueDate = node.Properties["due_date"].As<LocalDateTime>();
                 return new Loan
                 {
                     Id = node.Properties["id"].As<int>(),
-                    LoanDate = LoanDate.ToDateTimeOffset().UtcDateTime,
-                    DueDate = DueDate.ToDateTimeOffset().UtcDateTime,
+                    LoanDate = loanDate.ToDateTime(),
+                    DueDate = dueDate.ToDateTime(),
                     Status = node.Properties["status"].As<string>()
                 };
             }
