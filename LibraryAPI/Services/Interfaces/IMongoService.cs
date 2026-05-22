@@ -10,7 +10,6 @@ namespace LibraryAPI.Services.Interfaces
         where CDto : class
         where UDto : class
     {
-        Task<List<TDto>> GetAllAsync();
         Task<TDto> GetByIdAsync(int id);
 
         Task<TDto> CreateAsync(CDto dto);

@@ -16,10 +16,10 @@ public class MongoItemsController : ControllerBase
         itemService = new MongoItemService(context);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
+    [HttpGet("page/{page:int}")]
+    public async Task<IActionResult> GetPage(int page)
     {
-        return Ok(await itemService.GetAllAsync());
+        return Ok(await itemService.GetPageAsync(page));
     }
 
     [HttpGet("{id}")]

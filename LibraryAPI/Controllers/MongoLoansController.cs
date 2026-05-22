@@ -16,12 +16,6 @@ public class MongoLoansController : ControllerBase
        loanService= new MongoLoanService(context);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        return Ok(await loanService.GetAllAsync());
-    }
-
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {

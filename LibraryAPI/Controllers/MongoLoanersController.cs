@@ -17,13 +17,6 @@ namespace LibraryAPI.Controllers;
             loanerService = new MongoLoanerService(context);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            return Ok(await loanerService.GetAllAsync());
-        }
-
-
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)

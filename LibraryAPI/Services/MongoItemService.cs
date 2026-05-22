@@ -1,4 +1,5 @@
-﻿using LibraryAPI.DTOs;
+﻿using Azure;
+using LibraryAPI.DTOs;
 using LibraryAPI.Services.Interfaces;
 using LibraryMongoDBBackend.Repositories.Interfaces;
 using MongoDB.Bson;
@@ -15,10 +16,10 @@ namespace LibraryAPI.Services
             _repository = new MongoRepository<ItemMongo>(context, "Items");
         }
 
-        public async Task<List<ItemDto>> GetAllAsync()
+        public async Task<List<ItemDto>> GetPageAsync(int page = 1)
         {
-            var loans = await _repository.GetAllAsync();
-            return loans.Select(MapToDto).ToList();
+            var items = await _repository.GetPageAsync(page);
+             return items.Select(MapToDto).ToList();
         }
 
         public async Task<ItemDto> CreateAsync(CreateItemDto dto)
@@ -26,7 +27,7 @@ namespace LibraryAPI.Services
             var itemCreation = await _repository.CreateAsync(new ItemMongo
             {
                 _id = ObjectId.GenerateNewId(),
-                Id = (await GetAllAsync()).Count+1,
+                Id = (await _repository.GetAllAsync()).Count+1,
                 Name = dto.Name,
                 MediaType = dto.MediaType,
                 ReleaseYear = dto.ReleaseYear,

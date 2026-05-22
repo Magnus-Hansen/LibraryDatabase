@@ -50,12 +50,6 @@ namespace LibraryAPI.Services
                 throw new Exception($"Error deleting loan with ID {id}: {ex.Message}", ex);
             }
         }
-
-        public async Task<List<LoanDto>> GetAllAsync()
-        {
-            var loans = await _repository.GetAllAsync();
-            return loans.Select(MapToDto).ToList();
-        }
         public async Task<LoanDto> GetByIdAsync(int id)
         {
             var loan = await _repository.GetByIdAsync(id);
