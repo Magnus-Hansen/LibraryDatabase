@@ -9,6 +9,6 @@ namespace graphBackend.Models
     public class Language
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Language1 { get; set; }
     }
 }

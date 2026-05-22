@@ -1,15 +1,15 @@
 ﻿using LibraryAPI.DTOs;
 using LibraryAPI.Services.Graph.Interfaces;
-using LibrarySQLBackend.Models;
-using LibrarySQLBackend.Repositories.Interfaces;
+using graphBackend.Models;
+using graphBackend.Repositories.Interfaces;
 
 namespace LibraryAPI.Services
 {
     public class ItemServiceGraph : IItemServiceGraph
     {
-        private readonly IItemRepository _itemRepository;
+        private readonly IItemRepositoryGraph _itemRepository;
 
-        public ItemServiceGraph(IItemRepository itemRepository)
+        public ItemServiceGraph(IItemRepositoryGraph itemRepository)
         {
             _itemRepository = itemRepository;
         }
@@ -167,7 +167,7 @@ namespace LibraryAPI.Services
                 existingItem.Tags.Add(tag);
             }
 
-            if (mediaType == "book")
+            if (mediaType == "Book")
             {
                 if (existingItem.Boardgame != null)
                 {
@@ -184,7 +184,7 @@ namespace LibraryAPI.Services
                 existingItem.Book.NoOfPages = dto.Book?.NoOfPages;
                 existingItem.Book.Version = dto.Book?.Version;
             }
-            else if (mediaType == "boardgame")
+            else if (mediaType == "Boardgame")
             {
                 if (existingItem.Book != null)
                 {
