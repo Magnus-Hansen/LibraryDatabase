@@ -206,7 +206,7 @@ namespace graphBackend.Repositories
             return new Language
             {
                 Id = node.Properties["id"].As<int>(),
-                Language1 = node.Properties["language"].As<string>()
+                Language1 = node.Properties["name"].As<string>()
             };
         }
         private Publisher? MapPublisher(object value)
