@@ -33,13 +33,13 @@ namespace graphBackend.Repositories
                 items.Add(new Item
                 {
                     Id = node.Properties["id"].As<int>(),
-                    AverageStars = node.Properties["avarage_stars"].As<decimal>(),
-                    Description = node.Properties["description"].As<string>(),
-                    MediaType = node.Properties["media_type"].As<string>(),
-                    Image = node.Properties["image"].As<string>(),
-                    Name = node.Properties["name"].As<string>(),
-                    ReleaseYear = node.Properties["release_year"].As<int>(),
-                    ReviewSummary = node.Properties["review_summary"].As<string>()
+                    AverageStars = node.Properties.GetValueOrDefault("average_stars").As<decimal?>(),
+                    Description = node.Properties.GetValueOrDefault("description").As<string>(),
+                    MediaType = node.Properties.GetValueOrDefault("media_type").As<string>(),
+                    Image = node.Properties.GetValueOrDefault("image").As<string>(),
+                    Name = node.Properties.GetValueOrDefault("name").As<string>(),
+                    ReleaseYear = node.Properties.GetValueOrDefault("release_year").As<int>(),
+                    ReviewSummary = node.Properties.GetValueOrDefault("review_summary").As<string>()
                 });
             }
             return items;

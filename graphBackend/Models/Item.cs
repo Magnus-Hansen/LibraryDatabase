@@ -9,7 +9,7 @@ namespace graphBackend.Models
     public class Item
     {
         public int Id { get; set; }
-        public decimal AverageStars { get; set; }
+        public decimal? AverageStars { get; set; }
         public string Description { get; set; }
         public string MediaType { get; set; }
         public string Image { get; set; }
