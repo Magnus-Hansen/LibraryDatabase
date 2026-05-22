@@ -9,9 +9,9 @@ namespace graphBackend.Models
     public class Creator
     {
         public int Id { get; set; }
-        public string First_name { get; set; }
-        public string Last_name { get; set; }
-        public DateOnly? Birth_date { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public DateOnly? BirthDate { get; set; }
         public string Description { get; set; }
     }
 }

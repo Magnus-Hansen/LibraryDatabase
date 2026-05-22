@@ -1,7 +1,7 @@
 ﻿using LibraryAPI.DTOs;
 using LibraryAPI.Services.Graph.Interfaces;
-using LibrarySQLBackend.Models;
-using LibrarySQLBackend.Repositories.Interfaces;
+using graphBackend.Models;
+using graphBackend.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,12 +12,12 @@ namespace LibraryAPI.Services
 {
     public class LoanerServiceGraph : ILoanerServiceGraph
     {
-        private readonly ILoanerRepository _loanerRepository;
+        private readonly ILoanerRepositoryGraph _loanerRepository;
         private readonly IPasswordHasher<Loaner> _passwordHasher;
         private readonly IConfiguration _configuration;
 
         public LoanerServiceGraph(
-            ILoanerRepository loanerRepository,
+            ILoanerRepositoryGraph loanerRepository,
             IPasswordHasher<Loaner> passwordHasher,
             IConfiguration configuration)
         {

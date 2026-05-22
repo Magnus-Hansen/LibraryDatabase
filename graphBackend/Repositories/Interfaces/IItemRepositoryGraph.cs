@@ -19,7 +19,7 @@ namespace graphBackend.Repositories.Interfaces
         Task<List<Genre>> GetGenresByIdsAsync(List<int> ids);
         Task<List<Tag>> GetTagsByIdsAsync(List<int> ids);
 
-        void RemoveBook(Book book);
-        void RemoveBoardgame(Boardgame boardgame);
+        Task RemoveBook(Book book);
+        Task RemoveBoardgame(Boardgame boardgame);
     }
 }

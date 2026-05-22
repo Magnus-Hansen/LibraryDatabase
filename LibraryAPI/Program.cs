@@ -58,7 +58,6 @@ builder.Services.AddScoped<ILoanService, LoanService>();
 
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
-// AI service
 var aiEnabled = builder.Configuration.GetValue<bool>("Ai:Enabled");
 
 if (aiEnabled)
@@ -77,11 +76,11 @@ else
 }
 
 builder.Services.AddScoped<ILoanServiceGraph, LoanServiceGraph>();
-builder.Services.AddScoped<ILoanerServiceGraph, LoanerServiceGraph>();
+//builder.Services.AddScoped<ILoanerServiceGraph, LoanerServiceGraph>();
 builder.Services.AddScoped<IItemServiceGraph, ItemServiceGraph>();
 
 builder.Services.AddScoped<ILoanRepositoryGraph, LoanRepositoryGraph>();
-builder.Services.AddScoped<ILoanerRepositoryGraph, LoanerRepositoryGraph>();
+//builder.Services.AddScoped<ILoanerRepositoryGraph, LoanerRepositoryGraph>();
 builder.Services.AddScoped<IItemRepositoryGraph, ItemRepositoryGraph>();
 
 // JWT settings
