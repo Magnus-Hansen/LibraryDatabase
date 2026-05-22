@@ -118,6 +118,28 @@ namespace LibraryAPI.Services
             }
         }
 
+        public async Task<List<ItemDto>> GetByMediaType(
+            string mediaType,
+            int pageNumber = 1)
+            {
+            const int pageSize = 40;
+
+            var items = await _repository.GetAllAsync();
+
+            var filteredItems = items
+                .Where(i => i.MediaType != null &&
+                            i.MediaType.Equals(mediaType, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(i => i.Name)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return filteredItems
+                .Select(MapToDto)
+                .ToList();
+            }
+
+
         // -----------------------------
         // DTO MAPPER
         // -----------------------------

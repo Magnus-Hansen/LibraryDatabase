@@ -2,6 +2,8 @@
 using LibraryAPI.Services;
 using LibrarySQLBackend.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using System.Text.Json.Serialization;
 
 
 namespace LibraryAPI.Controllers;
@@ -15,8 +17,7 @@ namespace LibraryAPI.Controllers;
         public MongoLoanersController(MongoDbContext context)
         {
             loanerService = new MongoLoanerService(context);
-        }
-
+    }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)

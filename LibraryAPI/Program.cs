@@ -15,6 +15,7 @@ using graphBackend.Repositories;
 using LibrarySQLBackend.Context;
 using graphBackend.Repositories.Interfaces;
 using LibraryAPI.Services.Graph.Interfaces;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -147,6 +148,14 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters
+            .Add(new JsonStringEnumConverter());
+    });
 
 var app = builder.Build();
 

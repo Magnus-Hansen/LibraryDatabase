@@ -11,6 +11,13 @@ public class MongoItemsController : ControllerBase
 {
     private readonly MongoItemService itemService;
 
+    public enum MediaType
+    {
+        Book,
+        Boardgame
+    }
+    
+
     public MongoItemsController(MongoDbContext context)
     {
         itemService = new MongoItemService(context);
@@ -31,6 +38,16 @@ public class MongoItemsController : ControllerBase
             return NotFound();
 
         return Ok(item);
+    }
+
+    [HttpGet("{mediaType}/{pageNumber}")]
+    public async Task<ActionResult<List<ItemDto>>> GetByMediaType(
+        MediaType mediaType,
+        int pageNumber = 1)
+    {
+        var items = await itemService.GetByMediaType(mediaType.ToString(), pageNumber);
+
+        return Ok(items);
     }
 
     [HttpPost]
