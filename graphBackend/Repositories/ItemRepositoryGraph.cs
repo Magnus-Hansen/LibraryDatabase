@@ -159,29 +159,123 @@ namespace graphBackend.Repositories
             return true;
         }
 
-        public Task<List<Creator>> GetCreatorsByIdsAsync(List<int> ids)
+        public async Task<List<Creator>> GetCreatorsByIdsAsync(List<int> ids)
         {
-            throw new NotImplementedException();
+            if (ids == null || !ids.Any())
+                return new List<Creator>();
+
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+
+            var result = await session.RunAsync(@"
+            MATCH (c:Creator)
+            WHERE c.id IN $ids
+            RETURN c
+            ", new { ids });
+
+            var creators = new List<Creator>();
+
+            while (await result.FetchAsync())
+            {
+                var node = result.Current["c"].As<INode>();
+
+                creators.Add(new Creator
+                {
+                    Id = node.Properties["id"].As<int>(),
+                    FirstName = node.Properties.GetValueOrDefault("first_name")?.As<string>(),
+                    LastName = node.Properties.GetValueOrDefault("last_name")?.As<string>()
+                });
+            }
+
+            return creators;
         }
 
-        public Task<List<Genre>> GetGenresByIdsAsync(List<int> ids)
+        public async Task<List<Genre>> GetGenresByIdsAsync(List<int> ids)
         {
-            throw new NotImplementedException();
+            if (ids == null || !ids.Any())
+                return new List<Genre>();
+
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+
+            var result = await session.RunAsync(@"
+            MATCH (g:Genre)
+            WHERE g.id IN $ids
+            RETURN g
+            ", new { ids });
+
+            var genres = new List<Genre>();
+
+            while (await result.FetchAsync())
+            {
+                var node = result.Current["g"].As<INode>();
+
+                genres.Add(new Genre
+                {
+                    Id = node.Properties["id"].As<int>(),
+                    Name = node.Properties.GetValueOrDefault("name")?.As<string>()
+                });
+            }
+
+            return genres;
         }
 
-        public Task<List<Tag>> GetTagsByIdsAsync(List<int> ids)
+        public async Task<List<Tag>> GetTagsByIdsAsync(List<int> ids)
         {
-            throw new NotImplementedException();
+            if (ids == null || !ids.Any())
+                return new List<Tag>();
+
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+
+            var result = await session.RunAsync(@"
+            MATCH (t:Tag)
+            WHERE t.id IN $ids
+            RETURN t
+            ", new { ids });
+
+            var tags = new List<Tag>();
+
+            while (await result.FetchAsync())
+            {
+                var node = result.Current["t"].As<INode>();
+
+                tags.Add(new Tag
+                {
+                    Id = node.Properties["id"].As<int>(),
+                    Name = node.Properties.GetValueOrDefault("name")?.As<string>()
+                });
+            }
+
+            return tags;
+        }
+        public async Task RemoveBook(Book book)
+        {
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+
+            await session.ExecuteWriteAsync(async transaction =>
+            {
+                await transaction.RunAsync(@"
+                MATCH (b:Book {id: $id})
+                DETACH DELETE b
+                ", new
+                {
+                    id = book.Id
+                });
+            });
         }
 
-        public void RemoveBook(Book book)
+        public async Task RemoveBoardgame(Boardgame boardgame)
         {
-            throw new NotImplementedException();
-        }
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
 
-        public void RemoveBoardgame(Boardgame boardgame)
-        {
-            throw new NotImplementedException();
+            await session.ExecuteWriteAsync(async transaction =>
+            {
+                await transaction.RunAsync(@"
+                MATCH (bg:Boardgame {id: $id})
+                DETACH DELETE bg
+                ", new
+                {
+                    id = boardgame.Id
+                });
+            });
         }
         private List<T> MapList<T>(object value, Func<INode, T> mapper)
         {
@@ -193,14 +287,14 @@ namespace graphBackend.Repositories
         {
             return new Item
             {
-                Id = node.Properties["id"].As<int>(),
-                AverageStars = node.Properties["average_stars"].As<decimal>(),
-                Description = node.Properties["description"].As<string>(),
-                MediaType = node.Properties["media_type"].As<string>(),
-                Image = node.Properties["image"].As<string>(),
-                Name = node.Properties["name"].As<string>(),
-                ReleaseYear = node.Properties["release_year"].As<int?>(),
-                ReviewSummary = node.Properties["review_summary"].As<string>()
+                Id = node.Properties.GetValueOrDefault("id").As<int>(),
+                AverageStars = node.Properties.GetValueOrDefault("average_stars").As<decimal>(),
+                Description = node.Properties.GetValueOrDefault("description").As<string>(),
+                MediaType = node.Properties.GetValueOrDefault("media_type").As<string>(),
+                Image = node.Properties.GetValueOrDefault("image").As<string>(),
+                Name = node.Properties.GetValueOrDefault("name").As<string>(),
+                ReleaseYear = node.Properties.GetValueOrDefault("release_year").As<int?>(),
+                ReviewSummary = node.Properties.GetValueOrDefault("review_summary").As<string>()
             };
         }
         private Language? MapLanguage(object value)
@@ -251,6 +345,7 @@ namespace graphBackend.Repositories
             if (value is not INode node) return null;
             return new Book
             {
+                Id = node.Properties["id"].As<int>(),
                 Isbn = node.Properties["ISBN"].As<string>(),
                 NoOfPages = node.Properties["no_of_pages"].As<int?>(),
                 Version = node.Properties["version"].As<string>()
@@ -261,6 +356,7 @@ namespace graphBackend.Repositories
             if (value is not INode node) return null;
             return new Boardgame
             {
+                Id = node.Properties["id"].As<int>(),
                 NoOfPlayers = node.Properties["no_of_players"].As<string>(),
                 PlayTime = node.Properties["play_time"].As<string>(),
                 AgeGroup = node.Properties["age_group"].As<string>()
