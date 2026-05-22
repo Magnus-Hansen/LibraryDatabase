@@ -53,21 +53,24 @@ namespace graphBackend.Repositories
             MATCH (i:Item {id: $id})
 
             OPTIONAL MATCH (i)-[:HAS_LANGUAGE]->(l:Language)
-            OPTIONAL MATCH (i)-[:PUBLISHED_BY]->(p:Publisher)
-            OPTIONAL MATCH (i)-[:CREATED_BY]->(c:Creator)
-            OPTIONAL MATCH (i)-[:HAS_GENRE]->(g:Genre)
-            OPTIONAL MATCH (i)-[:TAGGED_AS]->(t:Tag)
-            OPTIONAL MATCH (i)-[:IS_BOOK]->(b:Book)
-            OPTIONAL MATCH (i)-[:IS_BOARDGAME]->(bg:Boardgame)
+            WITH i, l
 
-            RETURN i,
-                   l,
-                   p,
-                   collect(DISTINCT c) as creators,
-                   collect(DISTINCT g) as genres,
-                   collect(DISTINCT t) as tags,
-                   b,
-                   bg
+            OPTIONAL MATCH (i)-[:PUBLISHED_BY]->(p:Publisher)
+            WITH i, l, p
+
+            OPTIONAL MATCH (i)-[:CREATED_BY]->(c:Creator)
+            WITH i, l, p, collect(DISTINCT c) as creators
+
+            OPTIONAL MATCH (i)-[:GENRE_IS]->(g:Genre)
+            WITH i, l, p, creators, collect(DISTINCT g) as genres
+
+            OPTIONAL MATCH (i)-[:TAGGED_AS]->(t:Tag)
+            WITH i, l, p, creators, genres, collect(DISTINCT t) as tags
+
+            OPTIONAL MATCH (b:Book)-[:IS_BOOK]->(i)
+            OPTIONAL MATCH (bg:Boardgame)-[:IS_BOARDGAME]->(i)
+
+            RETURN i, l, p, creators, genres, tags, b, bg
             ";
             var result = await session.RunAsync(query, new { id });
             if (!await result.FetchAsync())
