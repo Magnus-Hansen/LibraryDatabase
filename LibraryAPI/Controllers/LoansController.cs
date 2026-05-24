@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/mysql/[controller]")]
     [ApiController]
     [Authorize]
     public class LoansController : ControllerBase

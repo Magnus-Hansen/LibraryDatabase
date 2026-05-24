@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LibraryAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/mysql/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly ILoanerService _loanerService;

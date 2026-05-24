@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/neo4j/[controller]")]
     [ApiController]
     public class ItemsControllerGraph : ControllerBase
     {
