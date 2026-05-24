@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LibrarySQLBackend.Models;
 
 [Table("fine")]
-[Index("LoanId", Name = "fk_fine_loan1_idx")]
+[Index("LoanId", Name = "fk_fine_loan1_idx", IsUnique = true)]
 public partial class Fine
 {
     [Key]
@@ -16,24 +16,24 @@ public partial class Fine
 
     [Column("amount")]
     [Precision(10, 2)]
-    public decimal? Amount { get; set; }
+    public decimal Amount { get; set; }
 
     [Column("status", TypeName = "enum('unpaid','paid','late')")]
-    public string? Status { get; set; }
+    public string Status { get; set; } = null!;
 
     [Column("created_date", TypeName = "datetime")]
-    public DateTime? CreatedDate { get; set; }
+    public DateTime CreatedDate { get; set; }
 
     [Column("paid_date", TypeName = "datetime")]
     public DateTime? PaidDate { get; set; }
 
     [Column("due_date", TypeName = "datetime")]
-    public DateTime? DueDate { get; set; }
+    public DateTime DueDate { get; set; }
 
     [Column("loan_id")]
     public int LoanId { get; set; }
 
     [ForeignKey("LoanId")]
-    [InverseProperty("Fines")]
+    [InverseProperty("Fine")]
     public virtual Loan Loan { get; set; } = null!;
 }

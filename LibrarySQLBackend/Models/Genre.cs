@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LibrarySQLBackend.Models;
 
 [Table("genre")]
+[Index("Name", Name = "name_UNIQUE", IsUnique = true)]
 public partial class Genre
 {
     [Key]

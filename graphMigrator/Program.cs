@@ -117,7 +117,7 @@ internal class Program
             catch (Exception ex)
             {
                 Console.WriteLine($"Error during migration: {ex.Message}");
-                await session.AbortTransactionAsync()
+                await session.AbortTransactionAsync();
                 return;
             }
         }

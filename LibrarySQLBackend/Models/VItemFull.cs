@@ -13,23 +13,23 @@ public partial class VItemFull
     public int ItemId { get; set; }
 
     [Column("name")]
-    [StringLength(100)]
-    public string? Name { get; set; }
+    [StringLength(255)]
+    public string Name { get; set; } = null!;
 
     [Column("release_year")]
-    public int? ReleaseYear { get; set; }
+    public ushort? ReleaseYear { get; set; }
 
-    [Column("description", TypeName = "mediumtext")]
+    [Column("description", TypeName = "text")]
     public string? Description { get; set; }
 
-    [Column("review_summary", TypeName = "mediumtext")]
+    [Column("review_summary", TypeName = "text")]
     public string? ReviewSummary { get; set; }
 
     [Column("media_type", TypeName = "enum('book','boardgame')")]
-    public string? MediaType { get; set; }
+    public string MediaType { get; set; } = null!;
 
     [Column("image")]
-    [StringLength(200)]
+    [StringLength(2048)]
     public string? Image { get; set; }
 
     [Column("average_stars")]
@@ -38,18 +38,18 @@ public partial class VItemFull
 
     [Column("language_name")]
     [StringLength(45)]
-    public string? LanguageName { get; set; }
+    public string LanguageName { get; set; } = null!;
 
     [Column("publisher_name")]
     [StringLength(70)]
-    public string? PublisherName { get; set; }
+    public string PublisherName { get; set; } = null!;
 
     [Column("ISBN")]
-    [StringLength(25)]
+    [StringLength(17)]
     public string? Isbn { get; set; }
 
     [Column("no_of_pages")]
-    public int? NoOfPages { get; set; }
+    public ushort? NoOfPages { get; set; }
 
     [Column("version")]
     [StringLength(45)]

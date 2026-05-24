@@ -24,7 +24,7 @@ public partial class Creator
     [Column("birthday")]
     public DateOnly? Birthday { get; set; }
 
-    [Column("description", TypeName = "mediumtext")]
+    [Column("description", TypeName = "text")]
     public string? Description { get; set; }
 
     [ForeignKey("CreatorId")]

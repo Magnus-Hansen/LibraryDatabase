@@ -9,6 +9,7 @@ namespace LibrarySQLBackend.Models;
 [Table("reservation")]
 [Index("ItemId", Name = "item_id_idx")]
 [Index("LoanerId", Name = "loaner_id_idx")]
+[Index("ItemId", "QueueNumber", Name = "uq_reservation_item_queue", IsUnique = true)]
 public partial class Reservation
 {
     [Key]
@@ -21,14 +22,11 @@ public partial class Reservation
     [Column("item_id")]
     public int ItemId { get; set; }
 
-    [Column("estimated_wait")]
-    public int? EstimatedWait { get; set; }
-
     [Column("status", TypeName = "enum('pending','ready for pickup','fulfilled')")]
-    public string? Status { get; set; }
+    public string Status { get; set; } = null!;
 
     [Column("queue_number")]
-    public int? QueueNumber { get; set; }
+    public uint QueueNumber { get; set; }
 
     [ForeignKey("ItemId")]
     [InverseProperty("Reservations")]

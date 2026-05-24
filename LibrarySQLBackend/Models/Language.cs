@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LibrarySQLBackend.Models;
 
 [Table("language")]
+[Index("Language1", Name = "language_UNIQUE", IsUnique = true)]
 public partial class Language
 {
     [Key]
@@ -15,7 +16,7 @@ public partial class Language
 
     [Column("language")]
     [StringLength(45)]
-    public string? Language1 { get; set; }
+    public string Language1 { get; set; } = null!;
 
     [InverseProperty("Language")]
     public virtual ICollection<Item> Items { get; set; } = new List<Item>();

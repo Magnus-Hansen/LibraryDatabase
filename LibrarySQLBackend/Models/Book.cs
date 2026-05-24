@@ -16,11 +16,11 @@ public partial class Book
     public int Id { get; set; }
 
     [Column("ISBN")]
-    [StringLength(25)]
+    [StringLength(17)]
     public string? Isbn { get; set; }
 
     [Column("no_of_pages")]
-    public int? NoOfPages { get; set; }
+    public ushort? NoOfPages { get; set; }
 
     [Column("version")]
     [StringLength(45)]
