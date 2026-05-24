@@ -31,7 +31,7 @@ namespace LibraryAPI.Services
                     AverageStars = i.AverageStars
                 }),
                 TotalCount = totalCount,
-                Page = page,
+                PageNumber = page,
                 PageSize = pageSize
             };
         }
@@ -99,7 +99,7 @@ namespace LibraryAPI.Services
                 }),
 
                 TotalCount = totalCount,
-                Page = page,
+                PageNumber = page,
                 PageSize = pageSize
             };
         }
