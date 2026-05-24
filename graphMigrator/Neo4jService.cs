@@ -478,8 +478,12 @@ namespace graphMigrator
                   OPTIONAL MATCH (loan)-[:HAS_FINE]->(f:Fine)
                   WITH loan, count(f) AS fineCount
                   WHERE fineCount = 0
+                  MATCH (c:Counter {name: ""Fine""})
+                  SET c.value = c.value + 1
+                  WITH loan, c.value AS nextId
 
                   CREATE (fine:Fine {
+                    id: nextId,
                     amount: 100.00,
                     status: ""unpaid"",
                     created_date: datetime(),
