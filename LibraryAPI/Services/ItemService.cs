@@ -18,21 +18,8 @@ namespace LibraryAPI.Services
             _aiSummaryService = aiSummaryService;
         }
 
-        
+        private const int PageSize = 40;
 
-        public async Task<IEnumerable<ItemDto>> GetAllAsync()
-        {
-            var items = await _itemRepository.GetAllAsync();
-
-            return items.Select(i => new ItemDto
-            {
-                Id = i.Id,
-                Name = i.Name,
-                ReleaseYear = i.ReleaseYear,
-                MediaType = i.MediaType,
-                AverageStars = i.AverageStars
-            });
-        }
 
         public async Task<ItemDetailsDto?> GetByIdAsync(int id)
         {
@@ -250,6 +237,54 @@ namespace LibraryAPI.Services
             {
                 Title = item.Name,
                 ReviewSummary = summary
+            };
+        }
+
+
+        public async Task<PagedResultDto<ItemDto>> GetAllAsync(int pageNumber)
+        {
+            pageNumber = Math.Max(pageNumber, 1);
+
+            var result = await _itemRepository.GetAllPagedAsync(pageNumber, PageSize);
+
+            return new PagedResultDto<ItemDto>
+            {
+                Items = result.Items.Select(MapToItemDto),
+                PageNumber = pageNumber,
+                PageSize = PageSize,
+                TotalCount = result.TotalCount
+            };
+        }
+
+        public async Task<PagedResultDto<ItemDto>> GetByMediaTypeAsync(string mediaType, int pageNumber)
+        {
+            pageNumber = Math.Max(pageNumber, 1);
+
+            var normalizedMediaType = mediaType.ToLower();
+
+            var result = await _itemRepository.GetByMediaTypePagedAsync(
+                normalizedMediaType,
+                pageNumber,
+                PageSize);
+
+            return new PagedResultDto<ItemDto>
+            {
+                Items = result.Items.Select(MapToItemDto),
+                PageNumber = pageNumber,
+                PageSize = PageSize,
+                TotalCount = result.TotalCount
+            };
+        }
+
+        private static ItemDto MapToItemDto(Item item)
+        {
+            return new ItemDto
+            {
+                Id = item.Id,
+                Name = item.Name,
+                ReleaseYear = item.ReleaseYear,
+                MediaType = item.MediaType,
+                AverageStars = item.AverageStars
             };
         }
 

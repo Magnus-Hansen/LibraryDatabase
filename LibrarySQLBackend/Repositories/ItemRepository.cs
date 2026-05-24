@@ -19,15 +19,6 @@ namespace LibrarySQLBackend.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<Item>> GetAllAsync()
-        {
-            return await _context.Items
-                .Include(i => i.Language)
-                .Include(i => i.Publisher)
-                .Include(i => i.Book)
-                .Include(i => i.Boardgame)
-                .ToListAsync();
-        }
 
         public async Task<Item?> GetByIdAsync(int id)
         {
@@ -118,5 +109,49 @@ namespace LibrarySQLBackend.Repositories
 
             return true;
         }
+
+        public async Task<(IEnumerable<Item> Items, int TotalCount)> GetAllPagedAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Items
+                .AsNoTracking()
+                .Include(i => i.Language)
+                .Include(i => i.Publisher)
+                .Include(i => i.Book)
+                .Include(i => i.Boardgame)
+                .OrderBy(i => i.Name);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
+        public async Task<(IEnumerable<Item> Items, int TotalCount)> GetByMediaTypePagedAsync(string mediaType, int pageNumber, int pageSize)
+        {
+            var normalizedMediaType = mediaType.ToLower();
+
+            var query = _context.Items
+                .AsNoTracking()
+                .Include(i => i.Language)
+                .Include(i => i.Publisher)
+                .Include(i => i.Book)
+                .Include(i => i.Boardgame)
+                .Where(i => i.MediaType != null && i.MediaType.ToLower() == normalizedMediaType)
+                .OrderBy(i => i.Name);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
     }
 }

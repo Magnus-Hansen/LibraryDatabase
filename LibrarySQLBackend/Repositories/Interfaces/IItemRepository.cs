@@ -9,7 +9,6 @@ namespace LibrarySQLBackend.Repositories.Interfaces
 {
     public interface IItemRepository
     {
-        Task<IEnumerable<Item>> GetAllAsync();
         Task<Item?> GetByIdAsync(int id);
         Task<Item> AddAsync(Item item);
         Task<bool> UpdateAsync(Item item);
@@ -22,5 +21,9 @@ namespace LibrarySQLBackend.Repositories.Interfaces
 
         void RemoveBook(Book book);
         void RemoveBoardgame(Boardgame boardgame);
+
+        Task<(IEnumerable<Item> Items, int TotalCount)> GetAllPagedAsync(int pageNumber, int pageSize);
+
+        Task<(IEnumerable<Item> Items, int TotalCount)> GetByMediaTypePagedAsync(string mediaType, int pageNumber, int pageSize);
     }
 }

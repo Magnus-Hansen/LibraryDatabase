@@ -8,7 +8,7 @@ namespace LibraryAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class ItemsController : ControllerBase
     {
         private readonly IItemService _itemService;
@@ -18,10 +18,28 @@ namespace LibraryAPI.Controllers
             _itemService = itemService;
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1)
         {
-            var items = await _itemService.GetAllAsync();
+            var items = await _itemService.GetAllAsync(pageNumber);
+            return Ok(items);
+        }
+
+        [HttpGet("type/{mediaType}")]
+        public async Task<IActionResult> GetByMediaType(string mediaType, [FromQuery] int pageNumber = 1)
+        {
+            var normalizedMediaType = mediaType.ToLower();
+
+            if (normalizedMediaType != "book" && normalizedMediaType != "boardgame")
+            {
+                return BadRequest(new
+                {
+                    message = "Invalid media type. Use 'book' or 'boardgame'."
+                });
+            }
+
+            var items = await _itemService.GetByMediaTypeAsync(normalizedMediaType, pageNumber);
             return Ok(items);
         }
 
