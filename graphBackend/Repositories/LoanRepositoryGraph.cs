@@ -94,15 +94,18 @@ namespace graphBackend.Repositories
                 WHERE l.status = 'overdue'
                   AND NOT (l)-[:HAS_FINE]->(:Fine)
 
+                MATCH (c:Counter {name: 'Fine'})
+                SET c.value = c.value + 1
+                WITH l, c.value AS nextId
+
                 CREATE (f:Fine {
-                    id: l.Id,
+                    id: nextId,
                     amount: 100.00,
                     status: 'unpaid',
                     created_date: datetime(),
                     due_date: datetime() + duration({days: 14}),
                     paid_date: null
                 })
-
                 CREATE (l)-[:HAS_FINE]->(f)
             ";
 
