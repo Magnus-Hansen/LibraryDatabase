@@ -113,7 +113,7 @@ namespace graphMigrator
                 @"UNWIND $objects AS i
                 MERGE (it:Item {id: i.Id})
                 SET it.name = i.Name, it.release_year = i.Release_year, it.description = i.Description, it.review_summary = i.Review_summary, 
-                it.media_type = i.Media_type, it.image = i.Image, it.average_stars = i.average_stars"
+                it.media_type = i.Media_type, it.image = i.Image, it.average_stars = i.Average_stars"
             },
             {
                 "Creator",
