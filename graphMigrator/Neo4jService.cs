@@ -361,7 +361,7 @@ namespace graphMigrator
             },
             {
                 "Item_name",
-                "CREATE TEXT INDEX textIndex_item_name FOR (n:Item) ON (n.name);"
+                "CREATE FULLTEXT INDEX textIndex_item_name FOR (n:Item) ON (n.name);"
             },
             {
                 "Item_mediaType",
@@ -369,7 +369,7 @@ namespace graphMigrator
             },
             {
                 "Loaner_name",
-                "CREATE FULLTEXT INDEX fulltextIndex_loanerName FOR (l:Loaner) ON EACH [l.first_name, l.last_name];"
+                "CREATE TEXT INDEX fulltextIndex_loanerName FOR (l:Loaner) ON EACH [l.first_name, l.last_name];"
             },
             {
                 "Creator_name",
