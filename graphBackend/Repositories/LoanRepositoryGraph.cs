@@ -87,32 +87,46 @@ namespace graphBackend.Repositories
             var result = await session.RunAsync(query, new { fineId });
             return await result.FetchAsync();
         }
-        public async Task<bool> MarkLoanOverdueAndCreateFineAsync(int loanId)
+        private async Task CreateFineIfMissingAsync(IAsyncSession session, int loanId)
+        {
+            var query = @"
+                MATCH (l:Loan {id: $loanId})
+                WHERE l.status = 'overdue'
+                  AND NOT (l)-[:HAS_FINE]->(:Fine)
+
+                CREATE (f:Fine {
+                    id: l.Id,
+                    amount: 100.00,
+                    status: 'unpaid',
+                    created_date: datetime(),
+                    due_date: datetime() + duration({days: 14}),
+                    paid_date: null
+                })
+
+                CREATE (l)-[:HAS_FINE]->(f)
+            ";
+
+            await session.RunAsync(query, new { loanId });
+        }
+        public async Task MarkOverdueLoansAsync()
         {
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            var query = @"
+                MATCH (l:Loan)
+                WHERE l.status IN ['active', 'borrowed']
+                  AND l.due_date < datetime()
 
-            return await session.ExecuteWriteAsync(async tx =>
+                SET l.status = 'overdue'
+
+                RETURN l.id AS loanId
+            ";
+            var result = await session.RunAsync(query);
+            while (await result.FetchAsync())
             {
-                var result = await tx.RunAsync(@"
-                    MATCH (l:Loan {id: $loanId})
-                    SET l.status = 'overdue'
-                    WITH l
-                    OPTIONAL MATCH (l)-[:HAS_FINE]->(f:Fine)
-                    WITH l, count(f) AS fineCount
-                    WHERE fineCount = 0
-                    CREATE (fine:Fine {
-                        amount: 100.0,
-                        status: 'unpaid',
-                        created_date: datetime(),
-                        due_date: datetime() + duration({days: 14}),
-                        paid_date: null
-                    })
-                    CREATE (l)-[:HAS_FINE]->(fine)
-                    RETURN l
-                ", new { loanId });
+                int loanId = result.Current["loanId"].As<int>();
 
-                return await result.FetchAsync();
-            });
+                await CreateFineIfMissingAsync(session, loanId);
+            }
         }
     }
 }
