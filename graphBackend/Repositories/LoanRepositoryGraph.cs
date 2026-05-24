@@ -73,5 +73,46 @@ namespace graphBackend.Repositories
                     "SET l.status = 'returned', l.return_date = $returnDate", new { loanId, returnDate });
             });
         }
+        public async Task<bool> PayFineAsync(int fineId)
+        {
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+
+            var query = @"
+                MATCH (f:Fine {id: $fineId})
+                WHERE f.status IN ['unpaid', 'late']
+                SET f.status = 'paid'
+                RETURN f
+            ";
+
+            var result = await session.RunAsync(query, new { fineId });
+            return await result.FetchAsync();
+        }
+        public async Task<bool> MarkLoanOverdueAndCreateFineAsync(int loanId)
+        {
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+
+            return await session.ExecuteWriteAsync(async tx =>
+            {
+                var result = await tx.RunAsync(@"
+                    MATCH (l:Loan {id: $loanId})
+                    SET l.status = 'overdue'
+                    WITH l
+                    OPTIONAL MATCH (l)-[:HAS_FINE]->(f:Fine)
+                    WITH l, count(f) AS fineCount
+                    WHERE fineCount = 0
+                    CREATE (fine:Fine {
+                        amount: 100.0,
+                        status: 'unpaid',
+                        created_date: datetime(),
+                        due_date: datetime() + duration({days: 14}),
+                        paid_date: null
+                    })
+                    CREATE (l)-[:HAS_FINE]->(fine)
+                    RETURN l
+                ", new { loanId });
+
+                return await result.FetchAsync();
+            });
+        }
     }
 }

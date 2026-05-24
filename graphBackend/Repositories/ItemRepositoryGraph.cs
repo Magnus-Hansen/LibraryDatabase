@@ -348,7 +348,11 @@ namespace graphBackend.Repositories
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
             await session.ExecuteWriteAsync(async transaction =>
             {
-                await transaction.RunAsync("MATCH (i:Item {id: $id}) DETACH DELETE i", new { id });
+                await transaction.RunAsync("MATCH (i:Item {id: $id}) " +
+                    "OPTIONAL MATCH (b:Book)-[:IS_BOOK]->(i)" +
+                    "OPTIONAL MATCH (bg:Boardgame)-[:IS_BOARDGAME]->(i)" +
+                    "WITH i, b, bg " +
+                    "DETACH DELETE i, b, bg", new { id });
             });
             return true;
         }
