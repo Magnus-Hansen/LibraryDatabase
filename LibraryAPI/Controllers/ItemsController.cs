@@ -8,7 +8,7 @@ namespace LibraryAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ItemsController : ControllerBase
     {
         private readonly IItemService _itemService;
