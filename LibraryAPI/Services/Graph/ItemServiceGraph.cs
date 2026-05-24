@@ -16,19 +16,26 @@ namespace LibraryAPI.Services
 
         
 
-        public async Task<IEnumerable<ItemDto>> GetAllAsync()
+        public async Task<PagedResultDto<ItemDto>> GetAllAsync(int page, int pageSize)
         {
-            var items = await _itemRepository.GetAllAsync();
+            var (items, totalCount) = await _itemRepository.GetAllAsync(page, pageSize);
 
-            return items.Select(i => new ItemDto
+            return new PagedResultDto<ItemDto>
             {
-                Id = i.Id,
-                Name = i.Name,
-                ReleaseYear = i.ReleaseYear,
-                MediaType = i.MediaType,
-                AverageStars = i.AverageStars
-            });
+                Items = items.Select(i => new ItemDto
+                {
+                    Id = i.Id,
+                    Name = i.Name,
+                    ReleaseYear = i.ReleaseYear,
+                    MediaType = i.MediaType,
+                    AverageStars = i.AverageStars
+                }),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
         }
+
 
         public async Task<ItemDetailsDto?> GetByIdAsync(int id)
         {
@@ -72,6 +79,30 @@ namespace LibraryAPI.Services
             }
             return itemDto;
         }
+        public async Task<PagedResultDto<ItemDto>> GetItemsByGenreAsync(int genreId, int page, int pageSize)
+        {
+            var (items, totalCount) =
+                await _itemRepository.GetItemsByGenreAsync(
+                    genreId,
+                    page,
+                    pageSize);
+
+            return new PagedResultDto<ItemDto>
+            {
+                Items = items.Select(i => new ItemDto
+                {
+                    Id = i.Id,
+                    Name = i.Name,
+                    ReleaseYear = i.ReleaseYear,
+                    MediaType = i.MediaType,
+                    AverageStars = i.AverageStars
+                }),
+
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
 
         public async Task<ItemDetailsDto> AddAsync(CreateItemDto dto)
         {
@@ -93,7 +124,7 @@ namespace LibraryAPI.Services
                 Genres = genres,
                 Tags = tags,
 
-                Book = dto.MediaType == "Book" && dto.Book != null
+                Book = dto.MediaType == "book" && dto.Book != null
             ? new Book
             {
                 Isbn = dto.Book.Isbn,
@@ -102,7 +133,7 @@ namespace LibraryAPI.Services
             }
             : null,
 
-                Boardgame = dto.MediaType == "Boardgame" && dto.Boardgame != null
+                Boardgame = dto.MediaType == "boardgame" && dto.Boardgame != null
             ? new Boardgame
             {
                 NoOfPlayers = dto.Boardgame?.NoOfPlayers,
@@ -167,7 +198,7 @@ namespace LibraryAPI.Services
                 existingItem.Tags.Add(tag);
             }
 
-            if (mediaType == "Book")
+            if (mediaType == "book")
             {
                 if (existingItem.Boardgame != null)
                 {
@@ -184,7 +215,7 @@ namespace LibraryAPI.Services
                 existingItem.Book.NoOfPages = dto.Book?.NoOfPages;
                 existingItem.Book.Version = dto.Book?.Version;
             }
-            else if (mediaType == "Boardgame")
+            else if (mediaType == "boardgame")
             {
                 if (existingItem.Book != null)
                 {

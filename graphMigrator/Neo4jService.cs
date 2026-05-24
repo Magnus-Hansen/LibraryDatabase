@@ -1,8 +1,9 @@
-﻿using Neo4j.Driver;
+﻿using MongoDB.Driver;
+using Neo4j.Driver;
 
 namespace graphMigrator
 {
-    public class Neo4jService
+    public class Neo4jService : IAsyncDisposable
     {
         private readonly IDriver _driver;
         private readonly string _database;
@@ -29,6 +30,23 @@ namespace graphMigrator
                 throw;
             }
         }
+        public async ValueTask DisposeAsync()
+        {
+            if (_driver != null)
+            {
+                await _driver.DisposeAsync();
+            }
+        }
+        public async Task InstallTrigger(string cypher)
+        {
+            await using var session = _driver.AsyncSession(o =>
+                o.WithDatabase("system"));
+
+            await session.ExecuteWriteAsync(async tx =>
+            {
+                await tx.RunAsync(cypher);
+            });
+        }
 
         public async Task DeleteConstraintIndex(IAsyncTransaction transaction)
         {
@@ -42,7 +60,7 @@ namespace graphMigrator
 
             foreach (var name in constraints)
             {
-                var cursor = await transaction.RunAsync($"DROP CONSTRAINT {name}");
+                var cursor = await transaction.RunAsync($"DROP CONSTRAINT `{name}`");
                 await cursor.ConsumeAsync();
             }
 
@@ -54,7 +72,7 @@ namespace graphMigrator
             });
             foreach (var name in indexes)
             {
-                var cursor = await transaction.RunAsync($"DROP INDEX {name}");
+                var cursor = await transaction.RunAsync($"DROP INDEX `{name}`");
                 await cursor.ConsumeAsync();
             }
         }
@@ -95,7 +113,7 @@ namespace graphMigrator
                 @"UNWIND $objects AS i
                 MERGE (it:Item {id: i.Id})
                 SET it.name = i.Name, it.release_year = i.Release_year, it.description = i.Description, it.review_summary = i.Review_summary, 
-                it.media_type = i.Media_type, it.image = i.Image, it.average_stars = i.Average_stars"
+                it.media_type = i.Media_type, it.image = i.Image, it.average_stars = i.average_stars"
             },
             {
                 "Creator",
@@ -143,7 +161,7 @@ namespace graphMigrator
                 "Reservation",
                 @"UNWIND $objects AS r
                 MERGE (re:Reservation {id: r.Id})
-                SET re.status = r.Status, re.queue_number = r. Queue_number"
+                SET re.status = r.Status, re.queue_number = r.Queue_number"
             },
             {
                 "Fine",
@@ -316,121 +334,160 @@ namespace graphMigrator
             },
             {
                 "Book_ISBN",
-                "CREATE CONSTRAINT book_ISBN FOR (book:Book) REQUIRE book.isbn IS UNIQUE"
+                "CREATE CONSTRAINT book_ISBN FOR (book:Book) REQUIRE book.ISBN IS UNIQUE;"
             },
             {
                 "Language_name",
-                "CREATE CONSTRAINT language_name FOR (language:Language) REQUIRE language.language IS UNIQUE"
+                "CREATE CONSTRAINT language_name FOR (language:Language) REQUIRE language.name IS UNIQUE;"
             },
             {
                 "Publisher_name",
-                "CREATE CONSTRAINT publisher_name FOR (publisher:Publisher) REQUIRE publisher.name IS UNIQUE"
+                "CREATE CONSTRAINT publisher_name FOR (publisher:Publisher) REQUIRE publisher.name IS UNIQUE;"
             }
         };
         public Dictionary<string, string> Indexes = new Dictionary<string, string>
         {
             {
                 "Item_release_year",
-                "CREATE INDEX rangeIndex_item_releaseYear FOR (n:Item) ON (n.release_year)"
+                "CREATE INDEX rangeIndex_item_releaseYear FOR (n:Item) ON (n.release_year);"
             },
             {
                 "Loan_due_date",
-                "CREATE INDEX rangeIndex_loan_dueDate FOR (n:Loan) ON (n.due_date)"
+                "CREATE INDEX rangeIndex_loan_dueDate FOR (n:Loan) ON (n.due_date);"
             },
             {
                 "Fine_due_date",
-                "CREATE INDEX rangeIndex_fine_dueDate FOR (n:Fine) ON (n.due_date)"
+                "CREATE INDEX rangeIndex_fine_dueDate FOR (n:Fine) ON (n.due_date);"
             },
             {
                 "Item_name",
-                "CREATE TEXT INDEX textIndex_item_name FOR (n:Item) ON (n.name)"
+                "CREATE TEXT INDEX textIndex_item_name FOR (n:Item) ON (n.name);"
             },
             {
                 "Item_mediaType",
-                "CREATE TEXT INDEX textIndex_item_mediaType FOR (n:Item) ON (n.media_type)"
+                "CREATE TEXT INDEX textIndex_item_mediaType FOR (n:Item) ON (n.media_type);"
             },
             {
                 "Loaner_name",
-                "CREATE FULLTEXT INDEX fulltextIndex_loanerName FOR (l:Loaner) ON EACH [l.first_name, l.last_name]"
+                "CREATE FULLTEXT INDEX fulltextIndex_loanerName FOR (l:Loaner) ON EACH [l.first_name, l.last_name];"
             },
             {
                 "Creator_name",
-                "CREATE FULLTEXT INDEX fulltextIndex_creatorName FOR (c:Creator) ON EACH [c.first_name, c.last_name]"
+                "CREATE FULLTEXT INDEX fulltextIndex_creatorName FOR (c:Creator) ON EACH [c.first_name, c.last_name];"
             },
             {
                 "Language_language",
-                "CREATE TEXT INDEX textIndex_language_language FOR (n:Language) ON (n.language)"
+                "CREATE TEXT INDEX textIndex_language_language FOR (n:Language) ON (n.name);"
             },
             {
                 "Publisher_name",
-                "CREATE TEXT INDEX textIndex_publisher_name FOR (n:Publisher) ON (n.name)"
+                "CREATE TEXT INDEX textIndex_publisher_name FOR (n:Publisher) ON (n.name);"
             },
             {
                 "Genre_name",
-                "CREATE TEXT INDEX textIndex_genre_name FOR (n:Genre) ON (n.name)"
+                "CREATE TEXT INDEX textIndex_genre_name FOR (n:Genre) ON (n.name);"
             },
             {
                 "Tag_name",
-                "CREATE TEXT INDEX textIndex_tag_name FOR (n:Tag) ON (n.name)"
+                "CREATE TEXT INDEX textIndex_tag_name FOR (n:Tag) ON (n.name);"
             },
             {
                 "Book_ISBN",
-                "CREATE TEXT INDEX textIndex_book_ISBN FOR (n:Book) ON (n.ISBN)"
+                "CREATE TEXT INDEX textIndex_book_ISBN FOR (n:Book) ON (n.ISBN);"
             }
         };
         public Dictionary<string, string> NodeId = new Dictionary<string, string>
         {
             {
                 "Loaner", 
-                "MATCH (n:Loaner) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Loaner'}) SET c.value = maxId"
+                "MATCH (n:Loaner) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Loaner'}) SET c.value = maxId;"
             },
             {
                 "Loan",
-                "MATCH (n:Loan) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Loan'}) SET c.value = maxId"
+                "MATCH (n:Loan) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Loan'}) SET c.value = maxId;"
             },
             {
                 "Item",
-                "MATCH (n:Item) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Item'}) SET c.value = maxId"
+                "MATCH (n:Item) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Item'}) SET c.value = maxId;"
             },
             {
                 "Inventory",
-                "MATCH (n:Inventory) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Inventory'}) SET c.value = maxId"
+                "MATCH (n:Inventory) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Inventory'}) SET c.value = maxId;"
             },
             {
                 "Fine",
-                "MATCH (n:Fine) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Fine'}) SET c.value = maxId"
+                "MATCH (n:Fine) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Fine'}) SET c.value = maxId;"
             },
             {
                 "Book",
-                "MATCH (n:Book) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Book'}) SET c.value = maxId"
+                "MATCH (n:Book) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Book'}) SET c.value = maxId;"
             },
             {
                 "Boardgame",
-                "MATCH (n:Boardgame) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Boardgame'}) SET c.value = maxId"
+                "MATCH (n:Boardgame) WITH coalesce(max(n.id), 0) AS maxId MERGE (c:Counter {name: 'Boardgame'}) SET c.value = maxId;"
             },
         };
-        public Dictionary<string, string> StoredObjects = new Dictionary<string, string>
+        public Dictionary<string, string> Procedures = new Dictionary<string, string>
         {
             {
                 "Procedure_PayFine",
-                @"CALL apoc.cypher.run('
-                    MATCH (f:Fine {id: $fine_id})
-                    WHERE f.status IN [""unpaid"", ""late""]
-                    SET f.status = ""paid"",
-                    RETURN f',
-                    {fine_id: $fine_id}
-                )
-                YIELD value
-                RETURN value
+                @"CALL apoc.custom.installProcedure(
+                  'payFine(fine_id::LONG) :: (f::NODE)',
+                  'MATCH (f:Fine {id: $fine_id})
+                   WHERE f.status IN [""unpaid"", ""late""]
+                   SET f.status = ""paid""
+                   RETURN f',
+                  'neo4j',
+                  'write'
+                );
                 "
-            },
-            {
-                "Trigger_CreateFine_OverdueLoan",
-                ""
-            },
+            }
+        };
+        public Dictionary<string, string> ScheduledJobs = new Dictionary<string, string>
+        {
             {
                 "ScheduledJob_MarkOverdueLoans",
-                ""
+                    @"
+                    CALL apoc.periodic.repeat(
+                        'mark-overdue-loans',
+                        '
+                        MATCH (l:Loan)
+                        WHERE l.status IN [""active"", ""borrowed""]
+                          AND l.due_date < datetime()
+                        SET l.status = ""overdue""
+                        ',
+                        86400000
+                    );
+                    "
+            }
+        };
+        public Dictionary<string, string> Triggers = new Dictionary<string, string>
+        {
+            {
+                "Trigger_CreateFine_OverdueLoan",
+                @"CALL apoc.trigger.install(
+                  'trg_loan_au_overdue_fine',
+                  '
+                  UNWIND $assignedNodeProperties AS change
+                  WITH change.node AS loan, change.old AS oldStatus, change.new AS newStatus
+                  WHERE newStatus = ""overdue"" AND oldStatus <> ""overdue""
+
+                  OPTIONAL MATCH (loan)-[:HAS_FINE]->(f:Fine)
+                  WITH loan, COUNT(f) AS fineCount
+                  WHERE fineCount = 0
+
+                  CREATE (fine:Fine {
+                    amount: 100.00,
+                    status: ""unpaid"",
+                    created_date: datetime(),
+                    due_date: datetime() + duration({days: 14}),
+                    paid_date: null
+                  })
+
+                  CREATE (loan)-[:HAS_FINE]->(fine)
+                  ',
+                  {phase:'after'}
+                );"
             }
         };
     }

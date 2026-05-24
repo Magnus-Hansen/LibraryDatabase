@@ -11,11 +11,15 @@ internal class Program
     {
         Secret secret = new Secret();
         var mysql = new MySqlService(secret.MySqlConnectionString);
-        var neo4j = new Neo4jService(secret.Neo4jUri, secret.Neo4jUser, secret.Neo4jPassword, secret.Neo4jDatabase);
+        await using var neo4j = new Neo4jService(secret.Neo4jUri, secret.Neo4jUser, secret.Neo4jPassword, secret.Neo4jDatabase);
         var neo4jQueries = neo4j.nodeQueries;
         var neo4jConstraints = neo4j.Constraint;
         var neo4jIndexes = neo4j.Indexes;
         var NodeId = neo4j.NodeId;
+        var procedures = neo4j.Procedures;
+        var scheduledJobs = neo4j.ScheduledJobs;
+        var triggers = neo4j.Triggers;
+
 
         await neo4j.ExecuteInTransaction(async transaction =>
         {
@@ -69,11 +73,17 @@ internal class Program
             }
 
         });
+        await neo4j.ExecuteInTransaction(async transaction =>
+        {
+            await neo4j.Neo4jExecute(transaction, scheduledJobs["ScheduledJob_MarkOverdueLoans"]);
+            //await neo4j.Neo4jExecute(transaction, triggers["Trigger_CreateFine_OverdueLoan"]);
+        });
+        //await neo4j.InstallTrigger(triggers["Trigger_CreateFine_OverdueLoan"]);
         Console.WriteLine("Completed neo4j migration");
-            
 
-            // MongoDB Migration
-            var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
+
+        // MongoDB Migration
+        /*    var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
 
         await mongoDB.EnsureUsersAndPrivilegesAsync();
 
@@ -111,6 +121,6 @@ internal class Program
                     return;
                 }
             }
-        
+        */
     }
 }
