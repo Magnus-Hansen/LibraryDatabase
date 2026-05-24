@@ -83,7 +83,7 @@ internal class Program
 
 
         // MongoDB Migration
-        /*    var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
+        var mongoDB = new MongoDBService(secret.MongoDbConnectionString, secret.MySqlConnectionString);
 
         await mongoDB.EnsureUsersAndPrivilegesAsync();
 
@@ -111,16 +111,15 @@ internal class Program
                 await mongoDB.ClearCollection("Reservations");
                 await mongoDB.InsertData("Reservations", mongoDB.TransformReservations());
 
-                    await session.CommitTransactionAsync();
-                    Console.WriteLine("Migration completed successfully.");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error during migration: {ex.Message}");
-                    await session.AbortTransactionAsync();
-                    return;
-                }
+                await session.CommitTransactionAsync();
+                Console.WriteLine("Migration completed successfully.");
             }
-        */
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during migration: {ex.Message}");
+                await session.AbortTransactionAsync()
+                return;
+            }
+        }
     }
 }

@@ -36,7 +36,7 @@ builder.Services.AddSingleton<IDriver>(sp =>
             config["Neo4j:Password"]));
 });
 
-/*builder.Services.AddSingleton<MongoDbContext>(sp =>
+builder.Services.AddSingleton<MongoDbContext>(sp =>
 {
     var configuration = sp.GetRequiredService<IConfiguration>();
 
@@ -44,7 +44,7 @@ builder.Services.AddSingleton<IDriver>(sp =>
     var databaseName = configuration["MongoDb:DatabaseName"];
 
     return new MongoDbContext(connectionString, databaseName);
-});*/
+});
 
 // Repositories + services
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
