@@ -468,12 +468,15 @@ namespace graphMigrator
                 @"CALL apoc.trigger.install(
                   'trg_loan_au_overdue_fine',
                   '
-                  UNWIND $assignedNodeProperties AS change
-                  WITH change.node AS loan, change.old AS oldStatus, change.new AS newStatus
-                  WHERE newStatus = ""overdue"" AND oldStatus <> ""overdue""
+                  UNWIND keys($assignedNodeProperties) AS nodeId
+                  WITH $assignedNodeProperties[nodeId] AS change
+                  WITH change.node AS loan, change.old AS oldProps, change.new AS newProps
+
+                  WHERE newProps.status = ""overdue""
+                    AND coalesce(oldProps.status, """") <> ""overdue""
 
                   OPTIONAL MATCH (loan)-[:HAS_FINE]->(f:Fine)
-                  WITH loan, COUNT(f) AS fineCount
+                  WITH loan, count(f) AS fineCount
                   WHERE fineCount = 0
 
                   CREATE (fine:Fine {
@@ -486,7 +489,8 @@ namespace graphMigrator
 
                   CREATE (loan)-[:HAS_FINE]->(fine)
                   ',
-                  {phase:'after'}
+                  'after',
+                  {}
                 );"
             }
         };
