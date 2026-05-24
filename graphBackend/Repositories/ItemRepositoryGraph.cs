@@ -22,14 +22,41 @@ namespace graphBackend.Repositories
                 await transaction.RunAsync("MATCH (i:Item {id: $id}) DETACH DELETE i", new { id });
             });
         }
-        public async Task<IEnumerable<Item>> GetAllAsync()
+        public async Task<(IEnumerable<Item> Items, int TotalCount)> GetAllAsync(int page, int pageSize)
         {
             var items = new List<Item>();
+
+            page = page < 1 ? 1 : page;
+            pageSize = pageSize < 1 ? 10 : pageSize;
+
+            var skip = (page - 1) * pageSize;
+
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
-            var result = await session.RunAsync("MATCH (i:Item) RETURN i");
+
+            var countResult = await session.RunAsync(@"
+                MATCH (i:Item)
+                RETURN count(i) AS total
+            ");
+
+            await countResult.FetchAsync();
+            var totalCount = countResult.Current["total"].As<int>();
+
+            var result = await session.RunAsync(@"
+                MATCH (i:Item)
+                RETURN i
+                ORDER BY i.id
+                SKIP $skip
+                LIMIT $limit
+            ", new
+            {
+                skip,
+                limit = pageSize
+            });
+
             while (await result.FetchAsync())
             {
                 var node = result.Current["i"].As<INode>();
+
                 items.Add(new Item
                 {
                     Id = node.Properties["id"].As<int>(),
@@ -42,9 +69,61 @@ namespace graphBackend.Repositories
                     ReviewSummary = node.Properties.GetValueOrDefault("review_summary").As<string>()
                 });
             }
-            return items;
+
+            return (items, totalCount);
         }
 
+        public async Task<(IEnumerable<Item> Items, int TotalCount)> GetItemsByGenreAsync(int genreId, int page, int pageSize)
+        {
+            var items = new List<Item>();
+
+            page = page < 1 ? 1 : page;
+            pageSize = pageSize < 1 ? 10 : pageSize;
+
+            var skip = (page - 1) * pageSize;
+
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+
+            var countResult = await session.RunAsync(@"
+                MATCH (i:Item)-[:GENRE_IS]->(g:Genre {id: $genreId})
+                RETURN count(i) AS total
+            ", new { genreId });
+
+            await countResult.FetchAsync();
+            var totalCount = countResult.Current["total"].As<int>();
+
+            var result = await session.RunAsync(@"
+                MATCH (i:Item)-[:GENRE_IS]->(g:Genre {id: $genreId})
+                RETURN i
+                ORDER BY i.name
+                SKIP $skip
+                LIMIT $limit
+            ", new
+            {
+                genreId,
+                skip,
+                limit = pageSize
+            });
+
+            while (await result.FetchAsync())
+            {
+                var node = result.Current["i"].As<INode>();
+
+                items.Add(new Item
+                {
+                    Id = node.Properties["id"].As<int>(),
+                    AverageStars = node.Properties.GetValueOrDefault("average_stars").As<decimal?>(),
+                    Description = node.Properties.GetValueOrDefault("description").As<string>(),
+                    MediaType = node.Properties.GetValueOrDefault("media_type").As<string>(),
+                    Image = node.Properties.GetValueOrDefault("image").As<string>(),
+                    Name = node.Properties.GetValueOrDefault("name").As<string>(),
+                    ReleaseYear = node.Properties.GetValueOrDefault("release_year").As<int>(),
+                    ReviewSummary = node.Properties.GetValueOrDefault("review_summary").As<string>()
+                });
+            }
+
+            return (items, totalCount);
+        }
         public async Task<Item?> GetByIdAsync(int id)
         {
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
@@ -92,18 +171,28 @@ namespace graphBackend.Repositories
 
             return item;
         }
-
         public async Task<Item> AddAsync(Item item)
         {
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
             int nextId = await new Services.IdGenerator(_driver, _database).GetNextId("Item");
+
             await session.ExecuteWriteAsync(async transaction =>
             {
-                await transaction.RunAsync("CREATE (i:Item {id: $id, description: $description, " +
-                    "media_type: $media_type, image: $image, name: $name, release_year: $release_year, review_summary: $review_summary})",
-                new
+                await transaction.RunAsync(@"
+                    CREATE (i:Item {
+                        id: $id,
+                        average_stars: $average_stars,
+                        description: $description,
+                        media_type: $media_type,
+                        image: $image,
+                        name: $name,
+                        release_year: $release_year,
+                        review_summary: $review_summary
+                    })
+                ", new
                 {
                     id = nextId,
+                    average_stars = item.AverageStars,
                     description = item.Description,
                     media_type = item.MediaType,
                     image = item.Image,
@@ -111,18 +200,124 @@ namespace graphBackend.Repositories
                     release_year = item.ReleaseYear,
                     review_summary = item.ReviewSummary
                 });
+
+                if (item.LanguageId != null)
+                {
+                    await transaction.RunAsync(@"
+                        MATCH (i:Item {id: $itemId})
+                        MATCH (l:Language {id: $languageId})
+                        MERGE (i)-[:HAS_LANGUAGE]->(l)
+                    ", new
+                    {
+                        itemId = nextId,
+                        languageId = item.LanguageId
+                    });
+                }
+
+                if (item.PublisherId != null)
+                {
+                    await transaction.RunAsync(@"
+                        MATCH (i:Item {id: $itemId})
+                        MATCH (p:Publisher {id: $publisherId})
+                        MERGE (i)-[:PUBLISHED_BY]->(p)
+                    ", new
+                    {
+                        itemId = nextId,
+                        publisherId = item.PublisherId
+                    });
+                }
+
+                foreach (var creator in item.Creators)
+                {
+                    await transaction.RunAsync(@"
+                        MATCH (i:Item {id: $itemId})
+                        MATCH (c:Creator {id: $creatorId})
+                        MERGE (i)-[:CREATED_BY]->(c)
+                    ", new
+                    {
+                        itemId = nextId,
+                        creatorId = creator.Id
+                    });
+                }
+
+                foreach (var genre in item.Genres)
+                {
+                    await transaction.RunAsync(@"
+                        MATCH (i:Item {id: $itemId})
+                        MATCH (g:Genre {id: $genreId})
+                        MERGE (i)-[:GENRE_IS]->(g)
+                    ", new
+                    {
+                        itemId = nextId,
+                        genreId = genre.Id
+                    });
+                }
+
+                foreach (var tag in item.Tags)
+                {
+                    await transaction.RunAsync(@"
+                        MATCH (i:Item {id: $itemId})
+                        MATCH (t:Tag {id: $tagId})
+                        MERGE (i)-[:TAGGED_AS]->(t)
+                    ", new
+                    {
+                        itemId = nextId,
+                        tagId = tag.Id
+                    });
+                }
+
+                if (item.Book != null)
+                {
+                    int nextBookId = await new Services.IdGenerator(_driver, _database).GetNextId("Book");
+
+                    await transaction.RunAsync(@"
+                        CREATE (b:Book {
+                            id: $id,
+                            ISBN: $isbn,
+                            no_of_pages: $pages,
+                            version: $version
+                        })
+                        WITH b
+                        MATCH (i:Item {id: $itemId})
+                        MERGE (b)-[:IS_BOOK]->(i)
+                    ", new
+                    {
+                        id = nextBookId,
+                        isbn = item.Book.Isbn,
+                        pages = item.Book.NoOfPages,
+                        version = item.Book.Version,
+                        itemId = nextId
+                    });
+                }
+
+                if (item.Boardgame != null)
+                {
+                    int nextBoardgameId = await new Services.IdGenerator(_driver, _database).GetNextId("Boardgame");
+
+                    await transaction.RunAsync(@"
+                        CREATE (bg:Boardgame {
+                            id: $id,
+                            no_of_players: $players,
+                            play_time: $playTime,
+                            age_group: $ageGroup
+                        })
+                        WITH bg
+                        MATCH (i:Item {id: $itemId})
+                        MERGE (bg)-[:IS_BOARDGAME]->(i)
+                    ", new
+                    {
+                        id = nextBoardgameId,
+                        players = item.Boardgame.NoOfPlayers,
+                        playTime = item.Boardgame.PlayTime,
+                        ageGroup = item.Boardgame.AgeGroup,
+                        itemId = nextId
+                    });
+                }
             });
-            return new Item
-            {
-                Id = nextId,
-                AverageStars = item.AverageStars,
-                Description = item.Description,
-                MediaType = item.MediaType,
-                Image = item.Image,
-                Name = item.Name,
-                ReleaseYear = item.ReleaseYear,
-                ReviewSummary = item.ReviewSummary
-            };
+
+            item.Id = nextId;
+
+            return item;
         }
 
         public async Task<bool> UpdateAsync(Item item)
@@ -131,12 +326,12 @@ namespace graphBackend.Repositories
             await session.ExecuteWriteAsync(async transaction =>
             {
                 await transaction.RunAsync("MATCH (i:Item {id: $id}) " +
-                    "SET i.avarage_stars = $avarage_stars, i.description = $description, i.media_type = $media_type, " +
+                    "SET i.average_stars = $average_stars, i.description = $description, i.media_type = $media_type, " +
                     "i.image = $image, i.name = $name, i.release_year = $release_year, i.review_summary = $review_summary",
                 new
                 {
                     id = item.Id,
-                    avarage_stars = item.AverageStars,
+                    average_stars = item.AverageStars,
                     description = item.Description,
                     media_type = item.MediaType,
                     image = item.Image,
@@ -153,7 +348,11 @@ namespace graphBackend.Repositories
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
             await session.ExecuteWriteAsync(async transaction =>
             {
-                await transaction.RunAsync("MATCH (i:Item {id: $id}) DETACH DELETE i", new { id });
+                await transaction.RunAsync("MATCH (i:Item {id: $id}) " +
+                    "OPTIONAL MATCH (b:Book)-[:IS_BOOK]->(i)" +
+                    "OPTIONAL MATCH (bg:Boardgame)-[:IS_BOARDGAME]->(i)" +
+                    "WITH i, b, bg " +
+                    "DETACH DELETE i, b, bg", new { id });
             });
             return true;
         }
@@ -287,6 +486,7 @@ namespace graphBackend.Repositories
             return new Item
             {
                 Id = node.Properties.GetValueOrDefault("id").As<int>(),
+                AverageStars = node.Properties.GetValueOrDefault("average_stars").As<decimal?>(),
                 Description = node.Properties.GetValueOrDefault("description").As<string>(),
                 MediaType = node.Properties.GetValueOrDefault("media_type").As<string>(),
                 Image = node.Properties.GetValueOrDefault("image").As<string>(),

@@ -77,11 +77,9 @@ else
 }
 
 builder.Services.AddScoped<ILoanServiceGraph, LoanServiceGraph>();
-//builder.Services.AddScoped<ILoanerServiceGraph, LoanerServiceGraph>();
 builder.Services.AddScoped<IItemServiceGraph, ItemServiceGraph>();
 
 builder.Services.AddScoped<ILoanRepositoryGraph, LoanRepositoryGraph>();
-//builder.Services.AddScoped<ILoanerRepositoryGraph, LoanerRepositoryGraph>();
 builder.Services.AddScoped<IItemRepositoryGraph, ItemRepositoryGraph>();
 
 // JWT settings

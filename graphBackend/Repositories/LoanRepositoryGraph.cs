@@ -73,5 +73,63 @@ namespace graphBackend.Repositories
                     "SET l.status = 'returned', l.return_date = $returnDate", new { loanId, returnDate });
             });
         }
+        public async Task<bool> PayFineAsync(int fineId)
+        {
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+
+            var query = @"
+                MATCH (f:Fine {id: $fineId})
+                WHERE f.status IN ['unpaid', 'late']
+                SET f.status = 'paid'
+                RETURN f
+            ";
+
+            var result = await session.RunAsync(query, new { fineId });
+            return await result.FetchAsync();
+        }
+        private async Task CreateFineIfMissingAsync(IAsyncSession session, int loanId)
+        {
+            var query = @"
+                MATCH (l:Loan {id: $loanId})
+                WHERE l.status = 'overdue'
+                  AND NOT (l)-[:HAS_FINE]->(:Fine)
+
+                MATCH (c:Counter {name: 'Fine'})
+                SET c.value = c.value + 1
+                WITH l, c.value AS nextId
+
+                CREATE (f:Fine {
+                    id: nextId,
+                    amount: 100.00,
+                    status: 'unpaid',
+                    created_date: datetime(),
+                    due_date: datetime() + duration({days: 14}),
+                    paid_date: null
+                })
+                CREATE (l)-[:HAS_FINE]->(f)
+            ";
+
+            await session.RunAsync(query, new { loanId });
+        }
+        public async Task MarkOverdueLoansAsync()
+        {
+            await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
+            var query = @"
+                MATCH (l:Loan)
+                WHERE l.status IN ['active', 'borrowed']
+                  AND l.due_date < datetime()
+
+                SET l.status = 'overdue'
+
+                RETURN l.id AS loanId
+            ";
+            var result = await session.RunAsync(query);
+            while (await result.FetchAsync())
+            {
+                int loanId = result.Current["loanId"].As<int>();
+
+                await CreateFineIfMissingAsync(session, loanId);
+            }
+        }
     }
 }
