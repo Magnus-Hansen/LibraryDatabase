@@ -124,16 +124,17 @@ public sealed class LibraryApiTests
     [TestMethod]
     public async Task Get_Items_ReturnsList()
     {
-        var response = await _httpClient.GetAsync("/api/items");
+        var response = await _httpClient.GetAsync("/api/mysql/items");
         var body = await response.Content.ReadAsStringAsync();
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, body);
 
-        var items = JsonSerializer.Deserialize<List<ItemDto>>(
+        var paged = JsonSerializer.Deserialize<PagedResultDto<ItemDto>>(
             body,
             new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
-        Assert.IsNotNull(items);
+        Assert.IsNotNull(paged);
+        var items = paged.Items?.ToList() ?? new List<ItemDto>();
         Assert.IsTrue(items.Count > 0);
     }
 
@@ -146,7 +147,7 @@ public sealed class LibraryApiTests
             AllowAutoRedirect = false
         });
 
-        var response = await client.GetAsync("/api/items");
+        var response = await client.GetAsync("/api/mysql/items");
 
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -154,7 +155,7 @@ public sealed class LibraryApiTests
     [TestMethod]
     public async Task Get_ItemById_ReturnsDetails()
     {
-        var response = await _httpClient.GetAsync("/api/items/1");
+        var response = await _httpClient.GetAsync("/api/mysql/items/1");
         var body = await response.Content.ReadAsStringAsync();
 
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, body);
@@ -173,7 +174,7 @@ public sealed class LibraryApiTests
     [TestMethod]
     public async Task Get_ItemById_Unknown_ReturnsNotFound()
     {
-        var response = await _httpClient.GetAsync("/api/items/999");
+        var response = await _httpClient.GetAsync("/api/mysql/items/999");
 
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -183,7 +184,7 @@ public sealed class LibraryApiTests
     {
         var dto = new UpdateItemDto { Name = "Does not matter" };
 
-        var response = await _httpClient.PutAsJsonAsync("/api/items/999", dto);
+        var response = await _httpClient.PutAsJsonAsync("/api/mysql/items/999", dto);
 
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -208,10 +209,10 @@ public sealed class LibraryApiTests
             }
         };
 
-        var putResponse = await _httpClient.PutAsJsonAsync("/api/items/1", dto);
+        var putResponse = await _httpClient.PutAsJsonAsync("/api/mysql/items/1", dto);
         Assert.AreEqual(HttpStatusCode.NoContent, putResponse.StatusCode);
 
-        var getResponse = await _httpClient.GetAsync("/api/items/1");
+        var getResponse = await _httpClient.GetAsync("/api/mysql/items/1");
         var body = await getResponse.Content.ReadAsStringAsync();
 
         Assert.AreEqual(HttpStatusCode.OK, getResponse.StatusCode, body);
@@ -239,7 +240,7 @@ public sealed class LibraryApiTests
     [TestMethod]
     public async Task Delete_Item_Unknown_ReturnsNotFound()
     {
-        var response = await _httpClient.DeleteAsync("/api/items/999");
+        var response = await _httpClient.DeleteAsync("/api/mysql/items/999");
 
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
