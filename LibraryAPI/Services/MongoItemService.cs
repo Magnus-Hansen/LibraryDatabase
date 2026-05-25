@@ -165,7 +165,7 @@ namespace LibraryAPI.Services
                 Name = item.Name,
                 ReleaseYear = item.ReleaseYear,
                 MediaType = item.MediaType,
-                AverageStars = (decimal)item.AverageStars
+                AverageStars = Math.Round((decimal)item.AverageStars, 1)
             };
         }
 
@@ -180,7 +180,7 @@ namespace LibraryAPI.Services
                 ReviewSummary = item.ReviewSummary,
                 MediaType = item.MediaType,
                 Image = item.Image,
-                AverageStars = (decimal?)item.AverageStars,
+                AverageStars = Math.Round((decimal)item.AverageStars, 1),
                 Language = item.Language.Name,
                 Publisher = item.Publisher?.Name,
                 Creators = item.Creators.Select(c => $"{c.FirstName} {c.LastName}").ToList(),
