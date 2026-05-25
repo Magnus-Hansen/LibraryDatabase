@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAPI.Controllers
 {
-    [Route("api/neo4j/items")]
+    [Route("api/neo4j/Items")]
     [ApiController]
     public class ItemsControllerGraph : ControllerBase
     {
@@ -21,10 +21,10 @@ namespace LibraryAPI.Controllers
             var result = await _itemService.GetAllAsync(page);
             return Ok(result);
         }
-        [HttpGet("type/{mediatype}")]
-        public async Task<IActionResult> GetByMediatype(string mediatype, [FromQuery] int page = 1)
+        [HttpGet("type/{mediaType}")]
+        public async Task<IActionResult> GetByMediatype(string mediaType, [FromQuery] int page = 1)
         {
-            var result = await _itemService.GetByMediatypeAsync(mediatype, page);
+            var result = await _itemService.GetByMediatypeAsync(mediaType, page);
 
             return Ok(result);
         }

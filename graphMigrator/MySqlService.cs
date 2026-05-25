@@ -75,7 +75,7 @@ namespace graphMigrator
                     Media_type = reader.GetString("media_type"),
                     Image = reader.IsDBNull("image") ? null : reader.GetString("image"),
                     Publisher_id = reader.GetInt32("publisher_id"),
-                    Average_stars = reader.IsDBNull("average_stars") ? null : Math.Round(reader.GetDecimal("average_stars"), 1)
+                    Average_stars = reader.IsDBNull("average_stars") ? null : Math.Round(reader.GetDouble("average_stars"), 1)
                 });
             }
             return items;
