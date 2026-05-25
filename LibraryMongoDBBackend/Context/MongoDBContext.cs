@@ -2,12 +2,13 @@
 
 public class MongoDbContext
 {
+    public IMongoClient Client { get; }
     private readonly IMongoDatabase _database;
 
     public MongoDbContext(string connectionString, string dbName)
     {
-        var client = new MongoClient(connectionString);
-        _database = client.GetDatabase(dbName);
+        Client = new MongoClient(connectionString);
+        _database = Client.GetDatabase(dbName);
     }
 
     public IMongoCollection<ItemMongo> Items =>
