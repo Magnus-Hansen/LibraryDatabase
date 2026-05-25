@@ -14,11 +14,11 @@ namespace LibraryAPI.Services
             _itemRepository = itemRepository;
         }
 
-        
+        private const int PageSize = 40;
 
-        public async Task<PagedResultDto<ItemDto>> GetAllAsync(int page, int pageSize)
+        public async Task<PagedResultDto<ItemDto>> GetAllAsync(int page)
         {
-            var (items, totalCount) = await _itemRepository.GetAllAsync(page, pageSize);
+            var (items, totalCount) = await _itemRepository.GetAllAsync(page, PageSize);
 
             return new PagedResultDto<ItemDto>
             {
@@ -32,7 +32,7 @@ namespace LibraryAPI.Services
                 }),
                 TotalCount = totalCount,
                 PageNumber = page,
-                PageSize = pageSize
+                PageSize = PageSize
             };
         }
 
@@ -79,13 +79,9 @@ namespace LibraryAPI.Services
             }
             return itemDto;
         }
-        public async Task<PagedResultDto<ItemDto>> GetItemsByGenreAsync(int genreId, int page, int pageSize)
+        public async Task<PagedResultDto<ItemDto>> GetByMediatypeAsync(string mediatype, int page)
         {
-            var (items, totalCount) =
-                await _itemRepository.GetItemsByGenreAsync(
-                    genreId,
-                    page,
-                    pageSize);
+            var (items, totalCount) = await _itemRepository.GetByMediatypeAsync(mediatype, page, PageSize);
 
             return new PagedResultDto<ItemDto>
             {
@@ -100,7 +96,7 @@ namespace LibraryAPI.Services
 
                 TotalCount = totalCount,
                 PageNumber = page,
-                PageSize = pageSize
+                PageSize = PageSize
             };
         }
 

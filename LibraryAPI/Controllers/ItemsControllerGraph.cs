@@ -16,18 +16,15 @@ namespace LibraryAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAll([FromQuery] int page = 1)
         {
-            var result = await _itemService.GetAllAsync(page, pageSize);
+            var result = await _itemService.GetAllAsync(page);
             return Ok(result);
         }
-        [HttpGet("genre/{genreId}")]
-        public async Task<IActionResult> GetByGenre(int genreId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        [HttpGet("type/{mediatype}")]
+        public async Task<IActionResult> GetByMediatype(string mediatype, [FromQuery] int page = 1)
         {
-            var result = await _itemService.GetItemsByGenreAsync(
-                genreId,
-                page,
-                pageSize);
+            var result = await _itemService.GetByMediatypeAsync(mediatype, page);
 
             return Ok(result);
         }

@@ -4,8 +4,8 @@ namespace LibraryAPI.Services.Graph.Interfaces
 {
     public interface IItemServiceGraph
     {
-        Task<PagedResultDto<ItemDto>> GetAllAsync(int page, int pageSize);
-        Task<PagedResultDto<ItemDto>> GetItemsByGenreAsync(int genreId, int page, int pageSize);
+        Task<PagedResultDto<ItemDto>> GetAllAsync(int page);
+        Task<PagedResultDto<ItemDto>> GetByMediatypeAsync(string mediatype, int page);
         Task<ItemDetailsDto?> GetByIdAsync(int id);
         Task<ItemDetailsDto> AddAsync(CreateItemDto itemDto);
         Task<bool> UpdateAsync(int id, UpdateItemDto dto);

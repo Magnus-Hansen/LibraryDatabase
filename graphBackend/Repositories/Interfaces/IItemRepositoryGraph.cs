@@ -10,7 +10,7 @@ namespace graphBackend.Repositories.Interfaces
     public interface IItemRepositoryGraph
     {
         Task<(IEnumerable<Item> Items, int TotalCount)> GetAllAsync(int page, int pageSize);
-        Task<(IEnumerable<Item> Items, int TotalCount)> GetItemsByGenreAsync(int genreId, int page, int pageSize);
+        Task<(IEnumerable<Item> Items, int TotalCount)> GetByMediatypeAsync(string mediatype, int page, int pageSize);
         Task<Item?> GetByIdAsync(int id);
         Task<Item> AddAsync(Item item);
         Task<bool> UpdateAsync(Item item);

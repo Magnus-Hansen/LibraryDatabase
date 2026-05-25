@@ -11,7 +11,7 @@
         public string? Image { get; set; }
         public required int Language_id { get; set; }
         public required int Publisher_id { get; set; }
-        public float? Average_stars { get; set; }
+        public Decimal? Average_stars { get; set; }
 
     }
 }

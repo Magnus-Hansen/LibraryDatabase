@@ -44,7 +44,7 @@ namespace graphBackend.Repositories
             var result = await session.RunAsync(@"
                 MATCH (i:Item)
                 RETURN i
-                ORDER BY i.id
+                ORDER BY i.name
                 SKIP $skip
                 LIMIT $limit
             ", new
@@ -73,34 +73,35 @@ namespace graphBackend.Repositories
             return (items, totalCount);
         }
 
-        public async Task<(IEnumerable<Item> Items, int TotalCount)> GetItemsByGenreAsync(int genreId, int page, int pageSize)
+        public async Task<(IEnumerable<Item> Items, int TotalCount)> GetByMediatypeAsync(string mediatype, int page, int pageSize)
         {
             var items = new List<Item>();
 
             page = page < 1 ? 1 : page;
             pageSize = pageSize < 1 ? 10 : pageSize;
-
             var skip = (page - 1) * pageSize;
 
             await using var session = _driver.AsyncSession(o => o.WithDatabase(_database));
 
             var countResult = await session.RunAsync(@"
-                MATCH (i:Item)-[:GENRE_IS]->(g:Genre {id: $genreId})
+                MATCH (i:Item)
+                WHERE i.media_type = $mediatype
                 RETURN count(i) AS total
-            ", new { genreId });
+            ", new { mediatype });
 
             await countResult.FetchAsync();
             var totalCount = countResult.Current["total"].As<int>();
 
             var result = await session.RunAsync(@"
-                MATCH (i:Item)-[:GENRE_IS]->(g:Genre {id: $genreId})
+                MATCH (i:Item)
+                WHERE i.media_type = $mediatype
                 RETURN i
                 ORDER BY i.name
                 SKIP $skip
                 LIMIT $limit
             ", new
             {
-                genreId,
+                mediatype,
                 skip,
                 limit = pageSize
             });
