@@ -5,7 +5,7 @@ using MongoDB.Bson;
 
 namespace LibraryAPI.Services
 {
-    public class MongoLoanerService : IMongoService<LoanersMongo, LoanerDto, RegisterLoanerDto, LoanerDto>
+    public class MongoLoanerService : IMongoService<LoanersMongo, LoanerDto, RegisterLoanerDto, LoanerDto, LoanerDto>
     {
         private readonly MongoRepository<LoanersMongo> _repository;
         private readonly IPasswordHasher<LoanersMongo> _passwordHasher;
@@ -19,7 +19,8 @@ namespace LibraryAPI.Services
         {
             var loaner = new LoanersMongo()
             {
-                Id = (await GetAllAsync()).Count + 1,
+                Id = (await _repository.GetAllAsync())
+                .Max(x => (int?)x.Id) + 1 ?? 1,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Cpr = dto.Cpr,
@@ -37,6 +38,10 @@ namespace LibraryAPI.Services
         {
             try
             {
+                LoanersMongo loaner = await _repository.GetByIdAsync(id);
+                if (loaner.ActiveLoans.Count > 0)
+                    throw new Exception("Cannot delete loaner with active loans.");
+
                 return await _repository.DeleteAsync(id);
             }
             catch (Exception ex)
@@ -58,7 +63,6 @@ namespace LibraryAPI.Services
             if (loaner == null)
                 return null;
             return MapToDto(loaner);
-        
         }
 
         private async Task<string> GetMongoId(int id)

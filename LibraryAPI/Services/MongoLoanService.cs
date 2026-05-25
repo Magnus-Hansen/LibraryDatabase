@@ -1,43 +1,70 @@
 ﻿using LibraryAPI.DTOs;
 using LibraryAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace LibraryAPI.Services
 {
-    public class MongoLoanService : IMongoService<LoansMongo, LoanDto, CreateLoanDto, LoanDto>
+    public class MongoLoanService : IMongoService<LoansMongo, LoanDto, CreateLoanDto, LoanDto, LoanDto>
     {
         private readonly MongoRepository<LoansMongo> _repository;
         private readonly MongoRepository<InventoryMongo> _inventoryRepository;
         private readonly MongoRepository<ItemMongo> _itemRepository;
+        private readonly MongoDbContext _context;
 
         public MongoLoanService(MongoDbContext context)
         {
+            _context = context;
             _repository = new MongoRepository<LoansMongo>(context, "Loans");
             _inventoryRepository = new MongoRepository<InventoryMongo>(context, "Inventory");
             _itemRepository = new MongoRepository<ItemMongo>(context, "Items");
         }
         public async Task<LoanDto> CreateAsync(CreateLoanDto newLoan)
         {
-            var inventory = await _inventoryRepository.GetByIdAsync(newLoan.InventoryId);
-            var item = await _itemRepository.GetByIdAsync(inventory.Item_Id);
-
-            var loanCreation = await _repository.CreateAsync(new LoansMongo
+            using (var session = await _context.Client.StartSessionAsync())
             {
-                _id = ObjectId.GenerateNewId(),
-                Id = (await _repository.GetAllAsync()).Count + 1, // Generate a new ID based on the count of existing loans
-                Loaner_Id = newLoan.LoanerId,
-                InventoryId = newLoan.InventoryId,
-                Loan_Date = DateTime.UtcNow,
-                Due_Date = DateTime.UtcNow.AddDays(14), // Example due date
-                Return_Date = null,
-                Status = "active",
-                Item_Snapshot = new ItemSnapshot { MediaType = item.MediaType, Name = item.Name }, // Fetch and set the item snapshot from InventoryMongo
-                Inventory_Snapshot = new InventorySnapshot { Barcode = inventory.Barcode }, // Fetch and set the inventory snapshot from InventoryMongo
-                Fines = new List<FineMongo>() // Initialize with an empty list
-            });
-            return MapToDto(loanCreation);
+                var transactionOptions = new TransactionOptions(
+                readConcern: ReadConcern.Majority,
+                writeConcern: WriteConcern.WMajority
+                );
+
+                session.StartTransaction(transactionOptions);
+                try
+                {
+                    var inventory = await _inventoryRepository.GetByIdAsync(newLoan.InventoryId);
+                    var item = await _itemRepository.GetByIdAsync(inventory.Item_Id);
+
+                    var loanCreation = await _repository.CreateAsync(new LoansMongo
+                    {
+                        _id = ObjectId.GenerateNewId(),
+                        Id = (await _repository.GetAllAsync())
+                        .Max(x => (int?)x.Id) + 1 ?? 1,
+                        Loaner_Id = newLoan.LoanerId,
+                        InventoryId = newLoan.InventoryId,
+                        Loan_Date = DateTime.UtcNow,
+                        Due_Date = DateTime.UtcNow.AddDays(14), // Example due date
+                        Return_Date = null,
+                        Status = "active",
+                        Item_Snapshot = new ItemSnapshot { MediaType = item.MediaType, Name = item.Name }, // Fetch and set the item snapshot from InventoryMongo
+                        Inventory_Snapshot = new InventorySnapshot { Barcode = inventory.Barcode }, // Fetch and set the inventory snapshot from InventoryMongo
+                        Fines = new List<FineMongo>() // Initialize with an empty list
+                    });
+
+                    // Update the inventory status to "loaned"
+                    inventory.Status = "loaned out";
+                    await _inventoryRepository.UpdateAsync(inventory.Id, inventory);
+                    await session.CommitTransactionAsync();
+                    return MapToDto(loanCreation);
+                }
+                catch (Exception ex)
+                {
+                    await session.AbortTransactionAsync();
+                    // Log the exception or handle it as needed
+                    throw new Exception($"Error creating loan: {ex.Message}", ex);
+                }
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)

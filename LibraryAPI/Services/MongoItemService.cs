@@ -7,19 +7,28 @@ using MongoDB.Driver;
 
 namespace LibraryAPI.Services
 {
-    public class MongoItemService : IMongoService<ItemMongo, ItemDto, CreateItemDto, UpdateItemDto>
+    public class MongoItemService : IMongoService<ItemMongo, ItemDto, CreateItemDto, UpdateItemDto, ItemDetailsDto>
     {
         private readonly MongoRepository<ItemMongo> _repository;
-
+        private const int PageSize = 40;
         public MongoItemService(MongoDbContext context)
         {
             _repository = new MongoRepository<ItemMongo>(context, "Items");
         }
 
-        public async Task<List<ItemDto>> GetPageAsync(int page = 1)
+        public async Task<PagedResultDto<ItemDto>> GetPageAsync(int pageNumber)
         {
-            var items = await _repository.GetPageAsync(page);
-             return items.Select(MapToDto).ToList();
+            pageNumber = Math.Max(pageNumber, 1);
+
+            var items = await _repository.GetPageAsync(pageNumber, PageSize);
+
+            return new PagedResultDto<ItemDto>
+            {
+                Items = items.Items.Select(MapToDto),
+                PageNumber = pageNumber,
+                PageSize = PageSize,
+                TotalCount = items.TotalCount
+            };
         }
 
         public async Task<ItemDto> CreateAsync(CreateItemDto dto)
@@ -27,7 +36,8 @@ namespace LibraryAPI.Services
             var itemCreation = await _repository.CreateAsync(new ItemMongo
             {
                 _id = ObjectId.GenerateNewId(),
-                Id = (await _repository.GetAllAsync()).Count+1,
+                Id = (await _repository.GetAllAsync())
+                .Max(x => (int?)x.Id) + 1 ?? 1,
                 Name = dto.Name,
                 MediaType = dto.MediaType,
                 ReleaseYear = dto.ReleaseYear,
@@ -99,13 +109,13 @@ namespace LibraryAPI.Services
                 return true;
             } return false;
         }
-        public async Task<ItemDto> GetByIdAsync(int id)
+        public async Task<ItemDetailsDto> GetByIdAsync(int id)
         {
             var item = await _repository.GetByIdAsync(id);
             if(item == null)
                 return null;
 
-            return MapToDto(item);
+            return MapToItemDetailsDto(item);
         }
         public async Task<bool> DeleteAsync(int id)
         {
@@ -118,11 +128,11 @@ namespace LibraryAPI.Services
             }
         }
 
-        public async Task<List<ItemDto>> GetByMediaType(
+        public async Task<PagedResultDto<ItemDto>> GetByMediaType(
             string mediaType,
-            int pageNumber = 1)
+            int pageNumber)
             {
-            const int pageSize = 40;
+            pageNumber = Math.Max(pageNumber, 1);
 
             var items = await _repository.GetAllAsync();
 
@@ -130,14 +140,18 @@ namespace LibraryAPI.Services
                 .Where(i => i.MediaType != null &&
                             i.MediaType.Equals(mediaType, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(i => i.Name)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+                .Skip((pageNumber - 1) * PageSize)
+                .Take(PageSize)
                 .ToList();
 
-            return filteredItems
-                .Select(MapToDto)
-                .ToList();
-            }
+            return new PagedResultDto<ItemDto>
+            {
+                Items = filteredItems.Select(MapToDto).ToList(),
+                PageNumber = pageNumber,
+                PageSize = PageSize,
+                TotalCount = filteredItems.Count
+            };
+        }
 
 
         // -----------------------------
@@ -151,7 +165,7 @@ namespace LibraryAPI.Services
                 Name = item.Name,
                 ReleaseYear = item.ReleaseYear,
                 MediaType = item.MediaType,
-                AverageStars = (decimal)item.AverageStars
+                AverageStars = Math.Round((decimal)item.AverageStars, 1)
             };
         }
 
@@ -166,7 +180,7 @@ namespace LibraryAPI.Services
                 ReviewSummary = item.ReviewSummary,
                 MediaType = item.MediaType,
                 Image = item.Image,
-                AverageStars = (decimal?)item.AverageStars,
+                AverageStars = Math.Round((decimal)item.AverageStars, 1),
                 Language = item.Language.Name,
                 Publisher = item.Publisher?.Name,
                 Creators = item.Creators.Select(c => $"{c.FirstName} {c.LastName}").ToList(),

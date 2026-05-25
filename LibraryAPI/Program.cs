@@ -1,6 +1,10 @@
+using graphBackend.Repositories;
+using graphBackend.Repositories.Interfaces;
 using LibraryAPI.Services;
-using LibraryAPI.Services.Interfaces;
 using LibraryAPI.Services.Graph;
+using LibraryAPI.Services.Graph.Interfaces;
+using LibraryAPI.Services.Interfaces;
+using LibrarySQLBackend.Context;
 using LibrarySQLBackend.Models;
 using LibrarySQLBackend.Repositories;
 using LibrarySQLBackend.Repositories.Interfaces;
@@ -9,12 +13,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
+using MongoDB.Driver;
 using Neo4j.Driver;
-using graphBackend.Repositories;
-using LibrarySQLBackend.Context;
-using graphBackend.Repositories.Interfaces;
-using LibraryAPI.Services.Graph.Interfaces;
+using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +24,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+    options.UseMySql(connectionString, Microsoft.EntityFrameworkCore.ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddSingleton<IDriver>(sp =>
 {
@@ -44,6 +45,11 @@ builder.Services.AddSingleton<MongoDbContext>(sp =>
     var databaseName = configuration["MongoDb:DatabaseName"];
 
     return new MongoDbContext(connectionString, databaseName);
+});
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    return new MongoClient(configuration["MongoDb:ConnectionString"]);
 });
 
 // Repositories + services

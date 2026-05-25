@@ -41,13 +41,15 @@ public class MongoRepository<T> : IRepository<T>
         return await _collection.Find(_ => true).ToListAsync();
     }
 
-   public async Task<List<T>> GetPageAsync(int page = 1, int pageSize = 40)
+    public async Task<(IEnumerable<T> Items, int TotalCount)> GetPageAsync(int page = 1, int pageSize = 40)
     {
         if (page < 1)
             page = 1;
 
         var skip = (page - 1) * pageSize;
-        return await _collection.Find(_ => true).Skip(skip).Limit(pageSize).ToListAsync();
+        var items = await _collection.Find(_ => true).Skip(skip).Limit(pageSize).ToListAsync();
+        var totalCount = (int)await _collection.CountDocumentsAsync(_ => true);
+        return (items, totalCount);
     }
 
     public async Task<bool> UpdateAsync(int id, T entity)
