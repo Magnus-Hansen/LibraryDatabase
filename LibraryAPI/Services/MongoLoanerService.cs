@@ -38,6 +38,10 @@ namespace LibraryAPI.Services
         {
             try
             {
+                LoanersMongo loaner = await _repository.GetByIdAsync(id);
+                if (loaner.ActiveLoans.Count > 0)
+                    throw new Exception("Cannot delete loaner with active loans.");
+
                 return await _repository.DeleteAsync(id);
             }
             catch (Exception ex)
