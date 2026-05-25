@@ -63,6 +63,12 @@ namespace LibrarySQLBackend.Repositories
             return true;
         }
 
+        public async Task<bool> HasInventoryAsync(int itemId)
+        {
+            return await _context.Inventories
+                .AnyAsync(i => i.ItemId == itemId);
+        }
+
         public async Task<List<Creator>> GetCreatorsByIdsAsync(List<int> ids)
         {
             return await _context.Creators

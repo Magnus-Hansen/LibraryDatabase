@@ -8,7 +8,7 @@ namespace LibraryAPI.Services.Interfaces
         Task<ItemDetailsDto?> GetByIdAsync(int id);
         Task<ItemDetailsDto> AddAsync(CreateItemDto itemDto);
         Task<bool> UpdateAsync(int id, UpdateItemDto dto);
-        Task<bool> DeleteAsync(int id);
+        Task<(bool Success, string Message)> DeleteAsync(int id);
         Task<ReviewSummaryResultDto?> GenerateReviewSummaryAsync(int id);
 
         Task<PagedResultDto<ItemDto>> GetAllAsync(int pageNumber);

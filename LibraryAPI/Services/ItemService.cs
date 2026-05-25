@@ -196,9 +196,28 @@ namespace LibraryAPI.Services
             return await _itemRepository.UpdateAsync(existingItem);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<(bool Success, string Message)> DeleteAsync(int id)
         {
-            return await _itemRepository.DeleteAsync(id);
+            var item = await _itemRepository.GetByIdAsync(id);
+
+            if (item == null)
+            {
+                return (false, "Item was not found.");
+            }
+
+            if (await _itemRepository.HasInventoryAsync(id))
+            {
+                return (false, "Item cannot be deleted because it still has inventory copies.");
+            }
+
+            var deleted = await _itemRepository.DeleteAsync(id);
+
+            if (!deleted)
+            {
+                return (false, "Item could not be deleted.");
+            }
+
+            return (true, "Item was deleted successfully.");
         }
 
         public async Task<ReviewSummaryResultDto?> GenerateReviewSummaryAsync(int id)

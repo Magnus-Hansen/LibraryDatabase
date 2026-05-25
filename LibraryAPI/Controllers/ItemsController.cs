@@ -75,16 +75,16 @@ namespace LibraryAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAsync(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _itemService.DeleteAsync(id);
+            var result = await _itemService.DeleteAsync(id);
 
-            if (!deleted)
+            if (!result.Success)
             {
-                return NotFound();
+                return Conflict(new { message = result.Message });
             }
 
-            return NoContent();
+            return Ok(new { message = result.Message });
         }
 
         [HttpPost("{id}/generate-review-summary")]
