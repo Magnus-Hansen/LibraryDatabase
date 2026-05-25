@@ -26,7 +26,8 @@ namespace LibraryAPI.Services
             var loanCreation = await _repository.CreateAsync(new LoansMongo
             {
                 _id = ObjectId.GenerateNewId(),
-                Id = (await _repository.GetAllAsync()).Count + 1, // Generate a new ID based on the count of existing loans
+                Id = (await _repository.GetAllAsync())
+                .Max(x => (int?)x.Id) + 1 ?? 1,
                 Loaner_Id = newLoan.LoanerId,
                 InventoryId = newLoan.InventoryId,
                 Loan_Date = DateTime.UtcNow,

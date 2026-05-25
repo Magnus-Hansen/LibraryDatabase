@@ -19,7 +19,8 @@ namespace LibraryAPI.Services
         {
             var loaner = new LoanersMongo()
             {
-                Id = (await GetAllAsync()).Count + 1,
+                Id = (await _repository.GetAllAsync())
+                .Max(x => (int?)x.Id) + 1 ?? 1,
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Cpr = dto.Cpr,

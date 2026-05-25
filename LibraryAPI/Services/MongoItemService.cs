@@ -36,7 +36,8 @@ namespace LibraryAPI.Services
             var itemCreation = await _repository.CreateAsync(new ItemMongo
             {
                 _id = ObjectId.GenerateNewId(),
-                Id = (await _repository.GetAllAsync()).Count+1,
+                Id = (await _repository.GetAllAsync())
+                .Max(x => (int?)x.Id) + 1 ?? 1,
                 Name = dto.Name,
                 MediaType = dto.MediaType,
                 ReleaseYear = dto.ReleaseYear,
