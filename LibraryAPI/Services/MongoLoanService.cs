@@ -6,7 +6,7 @@ using MongoDB.Driver;
 
 namespace LibraryAPI.Services
 {
-    public class MongoLoanService : IMongoService<LoansMongo, LoanDto, CreateLoanDto, LoanDto>
+    public class MongoLoanService : IMongoService<LoansMongo, LoanDto, CreateLoanDto, LoanDto, LoanDto>
     {
         private readonly MongoRepository<LoansMongo> _repository;
         private readonly MongoRepository<InventoryMongo> _inventoryRepository;

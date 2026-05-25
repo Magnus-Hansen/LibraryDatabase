@@ -5,7 +5,7 @@ using MongoDB.Bson;
 
 namespace LibraryAPI.Services
 {
-    public class MongoLoanerService : IMongoService<LoanersMongo, LoanerDto, RegisterLoanerDto, LoanerDto>
+    public class MongoLoanerService : IMongoService<LoanersMongo, LoanerDto, RegisterLoanerDto, LoanerDto, LoanerDto>
     {
         private readonly MongoRepository<LoanersMongo> _repository;
         private readonly IPasswordHasher<LoanersMongo> _passwordHasher;
@@ -58,7 +58,6 @@ namespace LibraryAPI.Services
             if (loaner == null)
                 return null;
             return MapToDto(loaner);
-        
         }
 
         private async Task<string> GetMongoId(int id)
