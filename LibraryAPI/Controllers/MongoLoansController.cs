@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAPI.Controllers;
 
-[Route("api/mongo/loans")]
+[Route("api/mongo/Loans")]
 [ApiController]
 public class MongoLoansController : ControllerBase
 {

@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace LibraryAPI.Controllers;
 
-    [Route("api/mongo/loaners")]
+    [Route("api/mongo/Loaners")]
     [ApiController]
     public class MongoLoanersController : ControllerBase
     {
